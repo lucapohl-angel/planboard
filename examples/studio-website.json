@@ -1,0 +1,352 @@
+{
+  "title": "Creative studio website — example plan",
+  "kind": "website",
+  "brief": "An illustrative plan for a small creative studio that wants visitors to understand its work and make a qualified enquiry. These are example assumptions, not confirmed requirements for your project.",
+  "objective": "Help a prospective client decide whether the studio fits their project and send a useful enquiry.",
+  "success": [
+    "A visitor can identify the studio's service and find relevant work without assistance.",
+    "The enquiry flow explains the next step and preserves input if sending fails."
+  ],
+  "scope": {
+    "now": [
+      "A clear introduction and services overview",
+      "Two complete project stories",
+      "An enquiry flow with confirmation and recovery"
+    ],
+    "later": [
+      "A journal, if the studio has capacity to maintain it",
+      "More case studies as evidence becomes available"
+    ],
+    "out": [
+      "A client portal or payment flow in the first release"
+    ]
+  },
+  "context": [
+    {
+      "id": "small-team",
+      "kind": "assumption",
+      "detail": "One person will maintain the site and project stories.",
+      "source": "Illustrative scenario; confirm with the actual owner."
+    },
+    {
+      "id": "existing-assets",
+      "kind": "unknown",
+      "detail": "The available brand assets, approved copy and case-study permissions still need checking.",
+      "source": ""
+    },
+    {
+      "id": "launch-time",
+      "kind": "unknown",
+      "detail": "There is no agreed launch date or budget yet.",
+      "source": ""
+    }
+  ],
+  "steps": [
+    {
+      "id": "direction",
+      "title": "Agree on the visitor and goal",
+      "summary": "Choose the main audience and the action the site should help them take.",
+      "why": "This keeps the copy, page structure and feature choices focused on one useful outcome.",
+      "deliverable": "A short brief with audience, primary action and first-release scope.",
+      "acceptance": [
+        "The owner can explain who the site serves and what visitors should do.",
+        "Assumptions and unresolved constraints are explicitly labeled."
+      ],
+      "dependsOn": []
+    },
+    {
+      "id": "content",
+      "title": "Prepare proof and project stories",
+      "summary": "Gather two project stories, real outcomes and approved imagery.",
+      "why": "Credible examples help visitors judge the studio; placeholder claims cannot do that.",
+      "deliverable": "Approved content and assets for two case studies.",
+      "acceptance": [
+        "Each story explains the client's need, the work and the result.",
+        "The studio has permission to use the included images and claims."
+      ],
+      "dependsOn": [
+        "direction"
+      ]
+    },
+    {
+      "id": "structure",
+      "title": "Map the path to an enquiry",
+      "summary": "Sketch the page structure and the journey from first visit to contact.",
+      "why": "It reveals missing information and confusing transitions before detailed design begins.",
+      "deliverable": "A small sitemap and a low-fidelity journey sketch.",
+      "acceptance": [
+        "Services, relevant work and contact can be found from the main entry.",
+        "The mobile journey and unsuccessful submission state are included."
+      ],
+      "dependsOn": [
+        "direction"
+      ]
+    },
+    {
+      "id": "build",
+      "title": "Design and build the first version",
+      "summary": "Use the approved content and journey to create a coherent, responsive site.",
+      "why": "Using the real content and existing brand reduces redesign and arbitrary component choices.",
+      "deliverable": "A working local preview using the project's established stack and visual system.",
+      "acceptance": [
+        "Desktop and mobile layouts preserve hierarchy and remain usable.",
+        "Forms, opened controls and keyboard focus follow the project design.",
+        "The enquiry path is tested without sending real messages."
+      ],
+      "dependsOn": [
+        "content",
+        "structure"
+      ]
+    },
+    {
+      "id": "verify",
+      "title": "Verify the complete journey",
+      "summary": "Test the visitor's task and fix confirmed issues before choosing a release date.",
+      "why": "A successful build alone does not show that visitors can understand or use the site.",
+      "deliverable": "A review report with observed results, fixes and outstanding limitations.",
+      "acceptance": [
+        "The main enquiry journey works with a keyboard and at a narrow viewport.",
+        "A failed submission keeps the entered information and offers a retry.",
+        "The owner reviews remaining issues and the actual publishing arrangements."
+      ],
+      "dependsOn": [
+        "build"
+      ]
+    }
+  ],
+  "questions": [
+    {
+      "id": "content-owner",
+      "question": "Who needs to update the project stories?",
+      "why": "The update workflow affects the site's setup and maintenance cost.",
+      "recommendation": "Start with project files if updates are rare and you are happy to ask Pi to make them. Choose an editor if someone needs to publish independently.",
+      "options": [
+        {
+          "label": "Update through Pi and project files",
+          "benefit": "A smaller setup with fewer services to maintain.",
+          "tradeoff": "Changes need someone comfortable reviewing and publishing code."
+        },
+        {
+          "label": "Use a content editor",
+          "benefit": "A non-developer can update stories independently.",
+          "tradeoff": "Adds setup, permissions and maintenance work."
+        }
+      ]
+    }
+  ],
+  "diagrams": [
+    {
+      "id": "site-map",
+      "title": "From first visit to a useful enquiry",
+      "description": "An illustrative sitemap. The same places stay on the map while each layer explains a different part of the proposed site. These are planning choices, not a built website.",
+      "nodes": [
+        {
+          "id": "home",
+          "label": "Home",
+          "column": 0,
+          "row": 0,
+          "type": "page"
+        },
+        {
+          "id": "work",
+          "label": "Project stories",
+          "column": 1,
+          "row": 0,
+          "type": "page"
+        },
+        {
+          "id": "story",
+          "label": "A project in detail",
+          "column": 2,
+          "row": 0,
+          "type": "page"
+        },
+        {
+          "id": "contact",
+          "label": "Make an enquiry",
+          "column": 1,
+          "row": 1,
+          "type": "page"
+        },
+        {
+          "id": "delivery",
+          "label": "Enquiry delivery",
+          "column": 2,
+          "row": 1,
+          "type": "service"
+        }
+      ],
+      "layers": [
+        {
+          "id": "visitor",
+          "title": "Visitor journey",
+          "color": "green",
+          "description": "Follow what a visitor sees and the choices they can make. Grey nodes belong to another part of the system.",
+          "nodes": [
+            {
+              "nodeId": "home",
+              "summary": "Understand the studio and its services.",
+              "detail": "The first page should explain what the studio does, who it helps and where to find relevant work."
+            },
+            {
+              "nodeId": "work",
+              "summary": "Choose a relevant project story.",
+              "detail": "A short list helps visitors find work similar to the problem they need solved."
+            },
+            {
+              "nodeId": "story",
+              "summary": "See the need, work and outcome.",
+              "detail": "A case study supplies evidence before the visitor decides to get in touch."
+            },
+            {
+              "nodeId": "contact",
+              "summary": "Describe a potential project.",
+              "detail": "The form asks for enough context to start a conversation, with a clear explanation of what happens after sending."
+            }
+          ],
+          "edges": [
+            {
+              "to": "work",
+              "label": "Explore work",
+              "detail": "The main page links to a small collection of relevant projects.",
+              "from": "home",
+              "style": "solid"
+            },
+            {
+              "to": "story",
+              "label": "Read a story",
+              "detail": "Choose a project to read its full explanation.",
+              "from": "work",
+              "style": "solid"
+            },
+            {
+              "to": "contact",
+              "label": "Ask about a project",
+              "detail": "Visitors who already know what they need can contact the studio directly.",
+              "from": "home",
+              "style": "solid"
+            },
+            {
+              "to": "contact",
+              "label": "Start a conversation",
+              "detail": "Each story offers a clear next step to discuss related work.",
+              "from": "story",
+              "style": "solid"
+            }
+          ]
+        },
+        {
+          "id": "implementation",
+          "title": "What powers it",
+          "color": "blue",
+          "description": "Understand which parts are pages, content and server behavior. Specific products remain undecided until the existing project is inspected.",
+          "nodes": [
+            {
+              "nodeId": "home",
+              "summary": "A page built with existing components.",
+              "detail": "Reuse the project’s navigation, content layout and visual tokens. The framework is a decision to confirm, not a new requirement."
+            },
+            {
+              "nodeId": "work",
+              "summary": "A collection of project content.",
+              "detail": "Project files are the simpler starting option. A content editor is an alternative if a non-developer must publish independently."
+            },
+            {
+              "nodeId": "story",
+              "summary": "One reusable case-study layout.",
+              "detail": "The same layout displays each story’s title, images, explanation and outcomes. Content changes should not create a new page design."
+            },
+            {
+              "nodeId": "contact",
+              "summary": "A branded form in the browser.",
+              "detail": "Use the existing form components. Browser validation improves feedback, but the receiving server must validate submissions too."
+            },
+            {
+              "nodeId": "delivery",
+              "summary": "A server-side submission handler.",
+              "detail": "This proposed endpoint receives the enquiry and forwards it using a delivery service chosen later. Service credentials stay on the server, outside the browser bundle."
+            }
+          ],
+          "edges": [
+            {
+              "to": "story",
+              "label": "Provides project content",
+              "detail": "The collection supplies the data rendered by the reusable case-study page.",
+              "from": "work",
+              "style": "solid"
+            },
+            {
+              "to": "contact",
+              "label": "Reuses navigation and controls",
+              "detail": "Shared components keep these pages consistent.",
+              "from": "home",
+              "style": "solid"
+            },
+            {
+              "to": "delivery",
+              "label": "Sends the enquiry",
+              "detail": "The browser calls the receiving endpoint; it does not hold delivery-service credentials.",
+              "from": "contact",
+              "style": "solid"
+            }
+          ]
+        },
+        {
+          "id": "recovery",
+          "title": "When something goes wrong",
+          "color": "orange",
+          "description": "Focus on the enquiry path. Other page nodes stay visible for orientation.",
+          "nodes": [
+            {
+              "nodeId": "contact",
+              "summary": "Keep the draft and explain the problem.",
+              "detail": "If submission fails, retain the entered information. Show a useful error beside the action and allow retry; do not display success without confirmation."
+            },
+            {
+              "nodeId": "delivery",
+              "summary": "Return a clear result.",
+              "detail": "The endpoint reports whether it accepted the request. A network timeout can leave delivery uncertain, so the final implementation must choose how to prevent duplicate enquiries."
+            }
+          ],
+          "edges": [
+            {
+              "to": "delivery",
+              "label": "Submit or retry",
+              "detail": "Retry should reuse the saved input and handle possible duplicate delivery.",
+              "from": "contact",
+              "style": "dashed"
+            },
+            {
+              "to": "contact",
+              "label": "Accepted, rejected or uncertain",
+              "detail": "Translate the server result into a clear message the visitor can act on.",
+              "from": "delivery",
+              "style": "dashed"
+            }
+          ]
+        }
+      ],
+      "groups": [
+        {
+          "id": "pages",
+          "title": "Website pages",
+          "color": "blue",
+          "nodeIds": [
+            "home",
+            "work",
+            "story"
+          ]
+        },
+        {
+          "id": "enquiries",
+          "title": "Enquiry handling",
+          "color": "green",
+          "nodeIds": [
+            "contact",
+            "delivery"
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,1568 @@
+{
+  "schemaVersion": 1,
+  "title": "FrameDesk — studio approvals app and API",
+  "kind": "webapp",
+  "brief": "Review example 2 of 2: a fictional multi-workspace app for studios to review assets and record approvals. Covers software, data, identity and operations nodes. Optional infrastructure is labeled explicitly.",
+  "objective": "Let a studio share a protected asset, collect an authorized approval and recover safely from expired sessions or failed processing.",
+  "success": [
+    "A reviewer can explain the main path and identify the unresolved choices.",
+    "Technology names, rationale and diagram nodes can be annotated individually.",
+    "No optional capability is silently treated as a launch requirement."
+  ],
+  "scope": {
+    "now": [
+      "Workspace-scoped project and asset review.",
+      "Explicit identity verification, membership checks and auditable approvals.",
+      "A small modular backend plus a browser client; optional scaling components remain deferred."
+    ],
+    "later": [
+      "Only add optional capabilities after evidence supports them."
+    ],
+    "out": [
+      "Purchasing services, deploying systems or producing final creative assets during this review."
+    ]
+  },
+  "context": [
+    {
+      "id": "demo",
+      "kind": "fact",
+      "detail": "This is a fictional but concrete review plan created to exercise the planning toolkit and its node types.",
+      "source": "User request: create two or three plans covering the node catalogue."
+    },
+    {
+      "id": "constraints",
+      "kind": "unknown",
+      "detail": "Actual budget, team capacity, existing systems and delivery dates have not been supplied.",
+      "source": ""
+    },
+    {
+      "id": "proposal",
+      "kind": "assumption",
+      "detail": "Technology and production-tool choices below are reviewable proposals, not approved purchases.",
+      "source": ""
+    }
+  ],
+  "technologies": [
+    {
+      "id": "typescript",
+      "name": "TypeScript",
+      "role": "Shared language for browser and server modules.",
+      "status": "proposed",
+      "rationale": "Makes interfaces and refactors easier to check across the app.",
+      "tradeoffs": "Type checking does not validate untrusted runtime input.",
+      "alternatives": [
+        "Use the existing project language when an established codebase already exists."
+      ],
+      "dependsOn": [],
+      "impacts": [
+        "Build tooling, types and package compatibility"
+      ],
+      "checks": [
+        "Enable appropriate strict checks.",
+        "Choose compatible runtime/build versions and commit one lockfile."
+      ],
+      "source": "https://www.typescriptlang.org/docs/",
+      "versionPlan": "No versions are fabricated or installed in this planning example. Before implementation, inspect existing manifests, choose compatible supported releases, record exact versions in the lockfile, and test updates."
+    },
+    {
+      "id": "data",
+      "name": "Supabase Postgres",
+      "role": "Authoritative workspace, membership, project and approval records.",
+      "status": "proposed",
+      "rationale": "A relational starting point for records that need explicit ownership and constraints.",
+      "tradeoffs": "Tenant isolation, migrations, pooling and restore behavior require design and tests.",
+      "alternatives": [
+        "An existing managed PostgreSQL service."
+      ],
+      "dependsOn": [],
+      "impacts": [
+        "Data model, migrations, permissions and backups"
+      ],
+      "checks": [
+        "Test forbidden cross-workspace reads and writes.",
+        "Rehearse migration and restore with non-production data."
+      ],
+      "source": "https://supabase.com/docs/guides/database/postgres/row-level-security",
+      "versionPlan": "No versions are fabricated or installed in this planning example. Before implementation, inspect existing manifests, choose compatible supported releases, record exact versions in the lockfile, and test updates."
+    },
+    {
+      "id": "identity",
+      "name": "Supabase Auth",
+      "role": "Managed sign-in, recovery and session identity.",
+      "status": "proposed",
+      "rationale": "Avoids a second home-built credential store while keeping application authorization explicit.",
+      "tradeoffs": "Provider behavior, redirects, session expiry and offboarding must be verified.",
+      "alternatives": [
+        "Reuse an existing identity provider.",
+        "Evaluate another managed identity service if required enterprise features are missing."
+      ],
+      "dependsOn": [
+        "data"
+      ],
+      "impacts": [
+        "Login, recovery, token verification, logout and workspace membership"
+      ],
+      "checks": [
+        "Test valid, expired, malformed and wrong-audience tokens.",
+        "Verify recovery, session expiry and removed-member access."
+      ],
+      "source": "https://supabase.com/docs/guides/auth ; https://supabase.com/docs/guides/auth/jwts",
+      "versionPlan": "No versions are fabricated or installed in this planning example. Before implementation, inspect existing manifests, choose compatible supported releases, record exact versions in the lockfile, and test updates."
+    },
+    {
+      "id": "backend",
+      "name": "Node.js + Fastify",
+      "role": "One modular HTTP API for assets, membership and approvals.",
+      "status": "proposed",
+      "rationale": "Keeps server responsibilities explicit and independently testable without splitting into microservices.",
+      "tradeoffs": "A separately hosted API introduces deployment and contract coordination.",
+      "alternatives": [
+        "A full-stack framework already used by the team."
+      ],
+      "dependsOn": [
+        "typescript",
+        "data",
+        "identity"
+      ],
+      "impacts": [
+        "HTTP contracts, authorization checks, validation and error handling"
+      ],
+      "checks": [
+        "Validate inputs and output schemas.",
+        "Check workspace membership server-side on every protected operation."
+      ],
+      "source": "https://fastify.dev/docs/latest/",
+      "versionPlan": "No versions are fabricated or installed in this planning example. Before implementation, inspect existing manifests, choose compatible supported releases, record exact versions in the lockfile, and test updates."
+    },
+    {
+      "id": "frontend",
+      "name": "React + Vite",
+      "role": "Browser UI, review states and locally validated forms.",
+      "status": "proposed",
+      "rationale": "A proposed client stack for an interaction-heavy approval workflow.",
+      "tradeoffs": "Client routing, fetching, accessible controls and loading/error states still need explicit choices.",
+      "alternatives": [
+        "The existing UI framework.",
+        "A server-rendered approach if the final experience is mostly content."
+      ],
+      "dependsOn": [
+        "typescript",
+        "backend",
+        "identity"
+      ],
+      "impacts": [
+        "Routes, forms, components and session presentation"
+      ],
+      "checks": [
+        "Test keyboard review and recovery without losing notes.",
+        "Verify the production build and supported browsers."
+      ],
+      "source": "https://react.dev/learn ; https://vite.dev/guide/",
+      "versionPlan": "No versions are fabricated or installed in this planning example. Before implementation, inspect existing manifests, choose compatible supported releases, record exact versions in the lockfile, and test updates."
+    },
+    {
+      "id": "files",
+      "name": "Supabase Storage",
+      "role": "Private asset files separate from relational metadata.",
+      "status": "proposed",
+      "rationale": "Fits a review workflow needing controlled file access.",
+      "tradeoffs": "File policy, upload limits, retention and temporary access must be checked.",
+      "alternatives": [
+        "Existing private object storage."
+      ],
+      "dependsOn": [
+        "data",
+        "identity"
+      ],
+      "impacts": [
+        "Uploads, previews, download access and deletion"
+      ],
+      "checks": [
+        "Reject unauthorized file access and unsupported uploads.",
+        "Test access expiry and deleted-member behavior."
+      ],
+      "source": "https://supabase.com/docs/guides/storage",
+      "versionPlan": "No versions are fabricated or installed in this planning example. Before implementation, inspect existing manifests, choose compatible supported releases, record exact versions in the lockfile, and test updates."
+    },
+    {
+      "id": "hosting",
+      "name": "Render web service + static client hosting",
+      "role": "Proposed hosting for the Node API and built client.",
+      "status": "proposed",
+      "rationale": "A managed deployment option to evaluate against the team’s existing hosting.",
+      "tradeoffs": "Region, operational cost, capacity and background-job support remain to be checked.",
+      "alternatives": [
+        "Reuse existing hosting if it meets runtime and data-location requirements."
+      ],
+      "dependsOn": [
+        "backend",
+        "frontend"
+      ],
+      "impacts": [
+        "Build commands, secrets, health checks and rollback"
+      ],
+      "checks": [
+        "Deploy an isolated staging build and verify configuration.",
+        "Rehearse rollback without losing recorded approvals."
+      ],
+      "source": "https://render.com/docs/deploy-node-express-app — general Node hosting example; validate the Fastify setup separately.",
+      "versionPlan": "No versions are fabricated or installed in this planning example. Before implementation, inspect existing manifests, choose compatible supported releases, record exact versions in the lockfile, and test updates."
+    },
+    {
+      "id": "jobs",
+      "name": "BullMQ + Redis — deferred option",
+      "role": "Optional heavier background-processing queue; not required for the initial synchronous approval path.",
+      "status": "deferred",
+      "rationale": "Consider only if measured processing volume needs a separate worker system.",
+      "tradeoffs": "Adds queue operations, connection management and duplicate/retry handling.",
+      "alternatives": [
+        "Start with a bounded durable job/outbox record and existing worker capability."
+      ],
+      "dependsOn": [
+        "backend"
+      ],
+      "impacts": [
+        "Workers, queue semantics, retries and hosting cost"
+      ],
+      "checks": [
+        "Demonstrate a workload that justifies the dependency.",
+        "Test duplicate jobs, worker restart and failed-job recovery."
+      ],
+      "source": "https://docs.bullmq.io/",
+      "versionPlan": "No versions are fabricated or installed in this planning example. Before implementation, inspect existing manifests, choose compatible supported releases, record exact versions in the lockfile, and test updates."
+    },
+    {
+      "id": "checks",
+      "name": "Type checks + Vitest + Playwright + axe-core",
+      "role": "Targeted verification of contracts, authorization and user journeys.",
+      "status": "proposed",
+      "rationale": "Covers code and browser behavior while using the existing quality workflow where possible.",
+      "tradeoffs": "Passing checks does not establish all security or product quality.",
+      "alternatives": [
+        "Reuse the project’s established equivalent test tools."
+      ],
+      "dependsOn": [
+        "backend",
+        "frontend"
+      ],
+      "impacts": [
+        "CI, contract tests and release criteria"
+      ],
+      "checks": [
+        "Run cross-workspace authorization tests.",
+        "Run sign-in, expired-session, approval and upload error journeys."
+      ],
+      "source": "Proposed verification stack; inspect the actual project before adding packages.",
+      "versionPlan": "No versions are fabricated or installed in this planning example. Before implementation, inspect existing manifests, choose compatible supported releases, record exact versions in the lockfile, and test updates."
+    }
+  ],
+  "steps": [
+    {
+      "id": "requirements",
+      "title": "Confirm studio roles and constraints",
+      "summary": "Define workspaces, asset sensitivity, owners and required integrations.",
+      "why": "Define workspaces, asset sensitivity, owners and required integrations.",
+      "deliverable": "Confirm studio roles and constraints — reviewable result",
+      "acceptance": [
+        "Demonstrate the described outcome with realistic examples.",
+        "Resolve relevant annotations before treating this step as reviewed."
+      ],
+      "dependsOn": [],
+      "status": "planned"
+    },
+    {
+      "id": "contracts",
+      "title": "Review stack, schema and access model",
+      "summary": "Compare the proposed technologies and testable ownership rules.",
+      "why": "Compare the proposed technologies and testable ownership rules.",
+      "deliverable": "Review stack, schema and access model — reviewable result",
+      "acceptance": [
+        "Demonstrate the described outcome with realistic examples.",
+        "Resolve relevant annotations before treating this step as reviewed."
+      ],
+      "dependsOn": [
+        "requirements"
+      ],
+      "status": "planned"
+    },
+    {
+      "id": "identity",
+      "title": "Implement sign-in and isolation first",
+      "summary": "Prove valid access and forbidden cross-workspace access before adding workflows.",
+      "why": "Prove valid access and forbidden cross-workspace access before adding workflows.",
+      "deliverable": "Implement sign-in and isolation first — reviewable result",
+      "acceptance": [
+        "Demonstrate the described outcome with realistic examples.",
+        "Resolve relevant annotations before treating this step as reviewed."
+      ],
+      "dependsOn": [
+        "contracts"
+      ],
+      "status": "planned"
+    },
+    {
+      "id": "approval",
+      "title": "Build the approval journey",
+      "summary": "Connect the client, API, records and private files with recovery states.",
+      "why": "Connect the client, API, records and private files with recovery states.",
+      "deliverable": "Build the approval journey — reviewable result",
+      "acceptance": [
+        "Demonstrate the described outcome with realistic examples.",
+        "Resolve relevant annotations before treating this step as reviewed."
+      ],
+      "dependsOn": [
+        "identity"
+      ],
+      "status": "planned"
+    },
+    {
+      "id": "operations",
+      "title": "Rehearse release and failure",
+      "summary": "Exercise expired sessions, retries, backup restore and rollback.",
+      "why": "Exercise expired sessions, retries, backup restore and rollback.",
+      "deliverable": "Rehearse release and failure — reviewable result",
+      "acceptance": [
+        "Demonstrate the described outcome with realistic examples.",
+        "Resolve relevant annotations before treating this step as reviewed."
+      ],
+      "dependsOn": [
+        "approval"
+      ],
+      "status": "planned"
+    }
+  ],
+  "questions": [
+    {
+      "id": "stack-choice",
+      "question": "Keep React/Fastify or use the existing project stack?",
+      "why": "Changing the framework changes builds, deployment and interface ownership.",
+      "recommendation": "Confirm the fit with your actual constraints before implementation.",
+      "options": [
+        {
+          "label": "Review this proposed stack",
+          "benefit": "Fits the proposed starting scope.",
+          "tradeoff": "Still requires the checks listed in this plan."
+        },
+        {
+          "label": "Reuse another established stack",
+          "benefit": "Keeps the alternative available.",
+          "tradeoff": "Revisit affected technology and delivery decisions."
+        }
+      ]
+    },
+    {
+      "id": "auth-choice",
+      "question": "Does Supabase Auth fit the studio’s login requirements?",
+      "why": "Identity changes affect sessions, roles, file access and recovery.",
+      "recommendation": "Confirm the fit with your actual constraints before implementation.",
+      "options": [
+        {
+          "label": "Evaluate Supabase Auth",
+          "benefit": "Fits the proposed starting scope.",
+          "tradeoff": "Still requires the checks listed in this plan."
+        },
+        {
+          "label": "Use an existing identity provider",
+          "benefit": "Keeps the alternative available.",
+          "tradeoff": "Revisit affected technology and delivery decisions."
+        }
+      ]
+    },
+    {
+      "id": "processing-choice",
+      "question": "Is heavy asynchronous processing required at launch?",
+      "why": "The worker and queue should be justified by actual workload.",
+      "recommendation": "Confirm the fit with your actual constraints before implementation.",
+      "options": [
+        {
+          "label": "Keep launch processing small",
+          "benefit": "Fits the proposed starting scope.",
+          "tradeoff": "Still requires the checks listed in this plan."
+        },
+        {
+          "label": "Evaluate a dedicated queue",
+          "benefit": "Keeps the alternative available.",
+          "tradeoff": "Revisit affected technology and delivery decisions."
+        }
+      ]
+    }
+  ],
+  "diagrams": [
+    {
+      "id": "api-contract",
+      "title": "Which technology runs each responsibility?",
+      "description": "Concrete proposed stack. The frontend displays state; the API verifies identity, membership and writes. Technology changes must revisit the contracts.",
+      "nodes": [
+        {
+          "id": "client",
+          "label": "React + Vite client",
+          "type": "client",
+          "column": 0,
+          "row": 0
+        },
+        {
+          "id": "api",
+          "label": "Fastify HTTP API",
+          "type": "api",
+          "column": 1,
+          "row": 0
+        },
+        {
+          "id": "endpoint",
+          "label": "POST /approvals",
+          "type": "endpoint",
+          "column": 2,
+          "row": 0
+        },
+        {
+          "id": "service",
+          "label": "Approval service",
+          "type": "service",
+          "column": 0,
+          "row": 1
+        },
+        {
+          "id": "module",
+          "label": "Workspace module",
+          "type": "module",
+          "column": 1,
+          "row": 1
+        },
+        {
+          "id": "function",
+          "label": "verifyAccess()",
+          "type": "function",
+          "column": 2,
+          "row": 1
+        },
+        {
+          "id": "external",
+          "label": "Email provider",
+          "type": "external",
+          "column": 0,
+          "row": 2
+        },
+        {
+          "id": "message",
+          "label": "Review notification",
+          "type": "message",
+          "column": 1,
+          "row": 2
+        }
+      ],
+      "layers": [
+        {
+          "id": "whole",
+          "title": "Whole picture",
+          "description": "Concrete proposed stack. The frontend displays state; the API verifies identity, membership and writes. Technology changes must revisit the contracts.",
+          "color": "green",
+          "nodes": [
+            {
+              "nodeId": "client",
+              "summary": "A focused review interface.",
+              "detail": "Shows projects and asset review states; never trusts a hidden button as an access-control boundary."
+            },
+            {
+              "nodeId": "api",
+              "summary": "A stable client contract.",
+              "detail": "One HTTP API serves the browser and future integrations; document actual operations before implementation."
+            },
+            {
+              "nodeId": "endpoint",
+              "summary": "Record an approval.",
+              "detail": "Accept an asset version and decision with a request identifier; reject unauthorized or obsolete-version actions."
+            },
+            {
+              "nodeId": "service",
+              "summary": "Validate the transition.",
+              "detail": "Check current asset version and membership before committing an approval."
+            },
+            {
+              "nodeId": "module",
+              "summary": "Keep ownership explicit.",
+              "detail": "Resolve workspace membership and allowed actions without duplicating that policy in each route."
+            },
+            {
+              "nodeId": "function",
+              "summary": "Identity plus membership.",
+              "detail": "Verify token properties using the selected provider configuration, then enforce membership and the requested permission."
+            },
+            {
+              "nodeId": "external",
+              "summary": "An integration to select.",
+              "detail": "Use an existing transactional provider if available; delivery failure must not erase an approval."
+            },
+            {
+              "nodeId": "message",
+              "summary": "Tell the right people.",
+              "detail": "Send truthful status with an authorized app link; do not expose private assets in email."
+            }
+          ],
+          "edges": [
+            {
+              "from": "client",
+              "to": "api",
+              "label": "Calls",
+              "detail": "React + Vite client connects to Fastify HTTP API: calls.",
+              "style": "solid"
+            },
+            {
+              "from": "api",
+              "to": "endpoint",
+              "label": "Routes request",
+              "detail": "Fastify HTTP API connects to POST /approvals: routes request.",
+              "style": "solid"
+            },
+            {
+              "from": "endpoint",
+              "to": "function",
+              "label": "Verify access",
+              "detail": "POST /approvals connects to verifyAccess(): verify access.",
+              "style": "solid"
+            },
+            {
+              "from": "function",
+              "to": "module",
+              "label": "Check membership",
+              "detail": "verifyAccess() connects to Workspace module: check membership.",
+              "style": "solid"
+            },
+            {
+              "from": "endpoint",
+              "to": "service",
+              "label": "Record decision",
+              "detail": "POST /approvals connects to Approval service: record decision.",
+              "style": "solid"
+            },
+            {
+              "from": "service",
+              "to": "message",
+              "label": "After durable write",
+              "detail": "Approval service connects to Review notification: after durable write.",
+              "style": "solid"
+            },
+            {
+              "from": "message",
+              "to": "external",
+              "label": "Send through",
+              "detail": "Review notification connects to Email provider: send through.",
+              "style": "solid"
+            }
+          ]
+        },
+        {
+          "id": "request",
+          "title": "Request path",
+          "description": "What happens when someone approves.",
+          "color": "yellow",
+          "nodes": [
+            {
+              "nodeId": "client",
+              "summary": "A focused review interface.",
+              "detail": "Shows projects and asset review states; never trusts a hidden button as an access-control boundary."
+            },
+            {
+              "nodeId": "api",
+              "summary": "A stable client contract.",
+              "detail": "One HTTP API serves the browser and future integrations; document actual operations before implementation."
+            },
+            {
+              "nodeId": "endpoint",
+              "summary": "Record an approval.",
+              "detail": "Accept an asset version and decision with a request identifier; reject unauthorized or obsolete-version actions."
+            },
+            {
+              "nodeId": "service",
+              "summary": "Validate the transition.",
+              "detail": "Check current asset version and membership before committing an approval."
+            },
+            {
+              "nodeId": "module",
+              "summary": "Keep ownership explicit.",
+              "detail": "Resolve workspace membership and allowed actions without duplicating that policy in each route."
+            },
+            {
+              "nodeId": "function",
+              "summary": "Identity plus membership.",
+              "detail": "Verify token properties using the selected provider configuration, then enforce membership and the requested permission."
+            }
+          ],
+          "edges": [
+            {
+              "from": "client",
+              "to": "api",
+              "label": "Calls",
+              "detail": "React + Vite client connects to Fastify HTTP API: calls.",
+              "style": "solid"
+            },
+            {
+              "from": "api",
+              "to": "endpoint",
+              "label": "Routes request",
+              "detail": "Fastify HTTP API connects to POST /approvals: routes request.",
+              "style": "solid"
+            },
+            {
+              "from": "endpoint",
+              "to": "function",
+              "label": "Verify access",
+              "detail": "POST /approvals connects to verifyAccess(): verify access.",
+              "style": "solid"
+            },
+            {
+              "from": "function",
+              "to": "module",
+              "label": "Check membership",
+              "detail": "verifyAccess() connects to Workspace module: check membership.",
+              "style": "solid"
+            },
+            {
+              "from": "endpoint",
+              "to": "service",
+              "label": "Record decision",
+              "detail": "POST /approvals connects to Approval service: record decision.",
+              "style": "solid"
+            }
+          ]
+        },
+        {
+          "id": "notice",
+          "title": "Notification",
+          "description": "A failed email does not undo the approval.",
+          "color": "orange",
+          "nodes": [
+            {
+              "nodeId": "service",
+              "summary": "Validate the transition.",
+              "detail": "Check current asset version and membership before committing an approval."
+            },
+            {
+              "nodeId": "external",
+              "summary": "An integration to select.",
+              "detail": "Use an existing transactional provider if available; delivery failure must not erase an approval."
+            },
+            {
+              "nodeId": "message",
+              "summary": "Tell the right people.",
+              "detail": "Send truthful status with an authorized app link; do not expose private assets in email."
+            }
+          ],
+          "edges": [
+            {
+              "from": "service",
+              "to": "message",
+              "label": "After durable write",
+              "detail": "Approval service connects to Review notification: after durable write.",
+              "style": "solid"
+            },
+            {
+              "from": "message",
+              "to": "external",
+              "label": "Send through",
+              "detail": "Review notification connects to Email provider: send through.",
+              "style": "solid"
+            }
+          ]
+        }
+      ],
+      "groups": []
+    },
+    {
+      "id": "async",
+      "title": "What can happen after the request?",
+      "description": "These are planned responsibility boundaries. Queue, scheduler and AI enhancements are optional until the workload justifies them.",
+      "nodes": [
+        {
+          "id": "event",
+          "label": "Approval recorded",
+          "type": "event",
+          "column": 0,
+          "row": 0
+        },
+        {
+          "id": "queue",
+          "label": "Optional job queue",
+          "type": "queue",
+          "column": 1,
+          "row": 0
+        },
+        {
+          "id": "worker",
+          "label": "Preview worker",
+          "type": "worker",
+          "column": 2,
+          "row": 0
+        },
+        {
+          "id": "webhook",
+          "label": "Verified callback",
+          "type": "webhook",
+          "column": 0,
+          "row": 1
+        },
+        {
+          "id": "state",
+          "label": "Pending → reviewed",
+          "type": "state",
+          "column": 1,
+          "row": 1
+        },
+        {
+          "id": "scheduler",
+          "label": "Optional reminders",
+          "type": "scheduler",
+          "column": 2,
+          "row": 1
+        },
+        {
+          "id": "ai_model",
+          "label": "Optional caption model",
+          "type": "ai_model",
+          "column": 0,
+          "row": 2
+        }
+      ],
+      "layers": [
+        {
+          "id": "whole",
+          "title": "Whole picture",
+          "description": "These are planned responsibility boundaries. Queue, scheduler and AI enhancements are optional until the workload justifies them.",
+          "color": "green",
+          "nodes": [
+            {
+              "nodeId": "event",
+              "summary": "A durable event.",
+              "detail": "Publish or record the event only after the approval is committed."
+            },
+            {
+              "nodeId": "queue",
+              "summary": "Buffer heavy work.",
+              "detail": "For larger processing volumes, evaluate BullMQ with its supported backend. Do not add it for appearance."
+            },
+            {
+              "nodeId": "worker",
+              "summary": "Process outside the UI.",
+              "detail": "A worker can create a preview with bounded retries and a stable job identity."
+            },
+            {
+              "nodeId": "webhook",
+              "summary": "Do not trust payloads.",
+              "detail": "Verify callback origin/authenticity, reject stale/replayed events and reconcile duplicates."
+            },
+            {
+              "nodeId": "state",
+              "summary": "An explicit lifecycle.",
+              "detail": "Rejected, superseded and failed states need visible next steps."
+            },
+            {
+              "nodeId": "scheduler",
+              "summary": "Respect actual status.",
+              "detail": "Reminder work checks whether review is still pending before sending."
+            },
+            {
+              "nodeId": "ai_model",
+              "summary": "Suggestion, not approval.",
+              "detail": "AI may propose captions later. Human review and clear data-handling choices are required before enabling it."
+            }
+          ],
+          "edges": [
+            {
+              "from": "event",
+              "to": "queue",
+              "label": "Optional processing",
+              "detail": "Approval recorded connects to Optional job queue: optional processing.",
+              "style": "dashed"
+            },
+            {
+              "from": "queue",
+              "to": "worker",
+              "label": "Dispatch job",
+              "detail": "Optional job queue connects to Preview worker: dispatch job.",
+              "style": "solid"
+            },
+            {
+              "from": "worker",
+              "to": "state",
+              "label": "Update outcome",
+              "detail": "Preview worker connects to Pending → reviewed: update outcome.",
+              "style": "solid"
+            },
+            {
+              "from": "webhook",
+              "to": "state",
+              "label": "Reconcile callback",
+              "detail": "Verified callback connects to Pending → reviewed: reconcile callback.",
+              "style": "solid"
+            },
+            {
+              "from": "scheduler",
+              "to": "state",
+              "label": "Check current status",
+              "detail": "Optional reminders connects to Pending → reviewed: check current status.",
+              "style": "solid"
+            },
+            {
+              "from": "worker",
+              "to": "ai_model",
+              "label": "Optional caption",
+              "detail": "Preview worker connects to Optional caption model: optional caption.",
+              "style": "dashed"
+            }
+          ]
+        },
+        {
+          "id": "recovery",
+          "title": "Processing and recovery",
+          "description": "Define durable state before retry behavior.",
+          "color": "yellow",
+          "nodes": [
+            {
+              "nodeId": "event",
+              "summary": "A durable event.",
+              "detail": "Publish or record the event only after the approval is committed."
+            },
+            {
+              "nodeId": "queue",
+              "summary": "Buffer heavy work.",
+              "detail": "For larger processing volumes, evaluate BullMQ with its supported backend. Do not add it for appearance."
+            },
+            {
+              "nodeId": "worker",
+              "summary": "Process outside the UI.",
+              "detail": "A worker can create a preview with bounded retries and a stable job identity."
+            },
+            {
+              "nodeId": "webhook",
+              "summary": "Do not trust payloads.",
+              "detail": "Verify callback origin/authenticity, reject stale/replayed events and reconcile duplicates."
+            },
+            {
+              "nodeId": "state",
+              "summary": "An explicit lifecycle.",
+              "detail": "Rejected, superseded and failed states need visible next steps."
+            }
+          ],
+          "edges": [
+            {
+              "from": "event",
+              "to": "queue",
+              "label": "Optional processing",
+              "detail": "Approval recorded connects to Optional job queue: optional processing.",
+              "style": "dashed"
+            },
+            {
+              "from": "queue",
+              "to": "worker",
+              "label": "Dispatch job",
+              "detail": "Optional job queue connects to Preview worker: dispatch job.",
+              "style": "solid"
+            },
+            {
+              "from": "worker",
+              "to": "state",
+              "label": "Update outcome",
+              "detail": "Preview worker connects to Pending → reviewed: update outcome.",
+              "style": "solid"
+            },
+            {
+              "from": "webhook",
+              "to": "state",
+              "label": "Reconcile callback",
+              "detail": "Verified callback connects to Pending → reviewed: reconcile callback.",
+              "style": "solid"
+            }
+          ]
+        },
+        {
+          "id": "later",
+          "title": "Deferred extras",
+          "description": "These are extensions, not launch requirements.",
+          "color": "orange",
+          "nodes": [
+            {
+              "nodeId": "worker",
+              "summary": "Process outside the UI.",
+              "detail": "A worker can create a preview with bounded retries and a stable job identity."
+            },
+            {
+              "nodeId": "state",
+              "summary": "An explicit lifecycle.",
+              "detail": "Rejected, superseded and failed states need visible next steps."
+            },
+            {
+              "nodeId": "scheduler",
+              "summary": "Respect actual status.",
+              "detail": "Reminder work checks whether review is still pending before sending."
+            },
+            {
+              "nodeId": "ai_model",
+              "summary": "Suggestion, not approval.",
+              "detail": "AI may propose captions later. Human review and clear data-handling choices are required before enabling it."
+            }
+          ],
+          "edges": [
+            {
+              "from": "worker",
+              "to": "state",
+              "label": "Update outcome",
+              "detail": "Preview worker connects to Pending → reviewed: update outcome.",
+              "style": "solid"
+            },
+            {
+              "from": "scheduler",
+              "to": "state",
+              "label": "Check current status",
+              "detail": "Optional reminders connects to Pending → reviewed: check current status.",
+              "style": "solid"
+            },
+            {
+              "from": "worker",
+              "to": "ai_model",
+              "label": "Optional caption",
+              "detail": "Preview worker connects to Optional caption model: optional caption.",
+              "style": "dashed"
+            }
+          ]
+        }
+      ],
+      "groups": []
+    },
+    {
+      "id": "data-ownership",
+      "title": "Where do records, files and derived data live?",
+      "description": "Postgres owns application records; files live in private storage. Cache and search are derived, optional layers.",
+      "nodes": [
+        {
+          "id": "database",
+          "label": "Supabase Postgres",
+          "type": "database",
+          "column": 0,
+          "row": 0
+        },
+        {
+          "id": "entity",
+          "label": "Asset version",
+          "type": "entity",
+          "column": 1,
+          "row": 0
+        },
+        {
+          "id": "schema",
+          "label": "Approval contract",
+          "type": "schema",
+          "column": 2,
+          "row": 0
+        },
+        {
+          "id": "storage",
+          "label": "Private file bucket",
+          "type": "storage",
+          "column": 0,
+          "row": 1
+        },
+        {
+          "id": "cache",
+          "label": "Optional response cache",
+          "type": "cache",
+          "column": 1,
+          "row": 1
+        },
+        {
+          "id": "search_index",
+          "label": "Optional search index",
+          "type": "search_index",
+          "column": 2,
+          "row": 1
+        },
+        {
+          "id": "dataset",
+          "label": "Evaluation samples",
+          "type": "dataset",
+          "column": 0,
+          "row": 2
+        },
+        {
+          "id": "backup",
+          "label": "Backup + restore",
+          "type": "backup",
+          "column": 1,
+          "row": 2
+        }
+      ],
+      "layers": [
+        {
+          "id": "whole",
+          "title": "Whole picture",
+          "description": "Postgres owns application records; files live in private storage. Cache and search are derived, optional layers.",
+          "color": "green",
+          "nodes": [
+            {
+              "nodeId": "database",
+              "summary": "Authoritative records.",
+              "detail": "Workspace, project, membership and approval records use explicit constraints and isolation tests."
+            },
+            {
+              "nodeId": "entity",
+              "summary": "The approved thing.",
+              "detail": "Approval points to a specific version, not a mutable filename."
+            },
+            {
+              "nodeId": "schema",
+              "summary": "Validate both sides.",
+              "detail": "Specify required IDs, allowed decisions and error responses shared with the API documentation."
+            },
+            {
+              "nodeId": "storage",
+              "summary": "Protect original files.",
+              "detail": "Restrict access and retention; metadata ownership alone does not protect the bytes."
+            },
+            {
+              "nodeId": "cache",
+              "summary": "Derived, never authority.",
+              "detail": "Add only for a measured bottleneck; define invalidation and avoid sharing private data across workspaces."
+            },
+            {
+              "nodeId": "search_index",
+              "summary": "Derived and refreshable.",
+              "detail": "Start with sufficient existing database search; an external index needs synchronization and access filtering."
+            },
+            {
+              "nodeId": "dataset",
+              "summary": "Use permitted examples.",
+              "detail": "A small consented or synthetic dataset helps test preview/AI quality without leaking client files."
+            },
+            {
+              "nodeId": "backup",
+              "summary": "Prove recovery works.",
+              "detail": "Review coverage of records and objects separately and rehearse restoration."
+            }
+          ],
+          "edges": [
+            {
+              "from": "entity",
+              "to": "database",
+              "label": "Stored as",
+              "detail": "Asset version connects to Supabase Postgres: stored as.",
+              "style": "solid"
+            },
+            {
+              "from": "schema",
+              "to": "entity",
+              "label": "Defines fields",
+              "detail": "Approval contract connects to Asset version: defines fields.",
+              "style": "solid"
+            },
+            {
+              "from": "entity",
+              "to": "storage",
+              "label": "References file",
+              "detail": "Asset version connects to Private file bucket: references file.",
+              "style": "solid"
+            },
+            {
+              "from": "database",
+              "to": "cache",
+              "label": "Optional derived view",
+              "detail": "Supabase Postgres connects to Optional response cache: optional derived view.",
+              "style": "dashed"
+            },
+            {
+              "from": "database",
+              "to": "search_index",
+              "label": "Optional indexing",
+              "detail": "Supabase Postgres connects to Optional search index: optional indexing.",
+              "style": "dashed"
+            },
+            {
+              "from": "dataset",
+              "to": "schema",
+              "label": "Exercises contract",
+              "detail": "Evaluation samples connects to Approval contract: exercises contract.",
+              "style": "solid"
+            },
+            {
+              "from": "database",
+              "to": "backup",
+              "label": "Recover records",
+              "detail": "Supabase Postgres connects to Backup + restore: recover records.",
+              "style": "solid"
+            },
+            {
+              "from": "storage",
+              "to": "backup",
+              "label": "Recover objects",
+              "detail": "Private file bucket connects to Backup + restore: recover objects.",
+              "style": "solid"
+            }
+          ]
+        },
+        {
+          "id": "core",
+          "title": "Core storage",
+          "description": "The minimum source-of-truth and recovery story.",
+          "color": "yellow",
+          "nodes": [
+            {
+              "nodeId": "database",
+              "summary": "Authoritative records.",
+              "detail": "Workspace, project, membership and approval records use explicit constraints and isolation tests."
+            },
+            {
+              "nodeId": "entity",
+              "summary": "The approved thing.",
+              "detail": "Approval points to a specific version, not a mutable filename."
+            },
+            {
+              "nodeId": "schema",
+              "summary": "Validate both sides.",
+              "detail": "Specify required IDs, allowed decisions and error responses shared with the API documentation."
+            },
+            {
+              "nodeId": "storage",
+              "summary": "Protect original files.",
+              "detail": "Restrict access and retention; metadata ownership alone does not protect the bytes."
+            },
+            {
+              "nodeId": "backup",
+              "summary": "Prove recovery works.",
+              "detail": "Review coverage of records and objects separately and rehearse restoration."
+            }
+          ],
+          "edges": [
+            {
+              "from": "entity",
+              "to": "database",
+              "label": "Stored as",
+              "detail": "Asset version connects to Supabase Postgres: stored as.",
+              "style": "solid"
+            },
+            {
+              "from": "schema",
+              "to": "entity",
+              "label": "Defines fields",
+              "detail": "Approval contract connects to Asset version: defines fields.",
+              "style": "solid"
+            },
+            {
+              "from": "entity",
+              "to": "storage",
+              "label": "References file",
+              "detail": "Asset version connects to Private file bucket: references file.",
+              "style": "solid"
+            },
+            {
+              "from": "database",
+              "to": "backup",
+              "label": "Recover records",
+              "detail": "Supabase Postgres connects to Backup + restore: recover records.",
+              "style": "solid"
+            },
+            {
+              "from": "storage",
+              "to": "backup",
+              "label": "Recover objects",
+              "detail": "Private file bucket connects to Backup + restore: recover objects.",
+              "style": "solid"
+            }
+          ]
+        },
+        {
+          "id": "derived",
+          "title": "Derived / optional",
+          "description": "Add these only when their purpose is established.",
+          "color": "orange",
+          "nodes": [
+            {
+              "nodeId": "database",
+              "summary": "Authoritative records.",
+              "detail": "Workspace, project, membership and approval records use explicit constraints and isolation tests."
+            },
+            {
+              "nodeId": "schema",
+              "summary": "Validate both sides.",
+              "detail": "Specify required IDs, allowed decisions and error responses shared with the API documentation."
+            },
+            {
+              "nodeId": "cache",
+              "summary": "Derived, never authority.",
+              "detail": "Add only for a measured bottleneck; define invalidation and avoid sharing private data across workspaces."
+            },
+            {
+              "nodeId": "search_index",
+              "summary": "Derived and refreshable.",
+              "detail": "Start with sufficient existing database search; an external index needs synchronization and access filtering."
+            },
+            {
+              "nodeId": "dataset",
+              "summary": "Use permitted examples.",
+              "detail": "A small consented or synthetic dataset helps test preview/AI quality without leaking client files."
+            }
+          ],
+          "edges": [
+            {
+              "from": "database",
+              "to": "cache",
+              "label": "Optional derived view",
+              "detail": "Supabase Postgres connects to Optional response cache: optional derived view.",
+              "style": "dashed"
+            },
+            {
+              "from": "database",
+              "to": "search_index",
+              "label": "Optional indexing",
+              "detail": "Supabase Postgres connects to Optional search index: optional indexing.",
+              "style": "dashed"
+            },
+            {
+              "from": "dataset",
+              "to": "schema",
+              "label": "Exercises contract",
+              "detail": "Evaluation samples connects to Approval contract: exercises contract.",
+              "style": "solid"
+            }
+          ]
+        }
+      ],
+      "groups": []
+    },
+    {
+      "id": "identity-access",
+      "title": "How do sign-in and permissions work?",
+      "description": "Supabase Auth establishes identity. Fastify and the data/file policies enforce permitted access; these are separate responsibilities.",
+      "nodes": [
+        {
+          "id": "auth",
+          "label": "Supabase Auth",
+          "type": "auth",
+          "column": 0,
+          "row": 0
+        },
+        {
+          "id": "permission",
+          "label": "Workspace role",
+          "type": "permission",
+          "column": 1,
+          "row": 0
+        },
+        {
+          "id": "policy",
+          "label": "Authorization policy",
+          "type": "policy",
+          "column": 2,
+          "row": 0
+        },
+        {
+          "id": "secret",
+          "label": "Server credentials",
+          "type": "secret",
+          "column": 0,
+          "row": 1
+        },
+        {
+          "id": "boundary",
+          "label": "Browser ↔ API",
+          "type": "boundary",
+          "column": 1,
+          "row": 1
+        }
+      ],
+      "layers": [
+        {
+          "id": "whole",
+          "title": "Whole picture",
+          "description": "Supabase Auth establishes identity. Fastify and the data/file policies enforce permitted access; these are separate responsibilities.",
+          "color": "green",
+          "nodes": [
+            {
+              "nodeId": "auth",
+              "summary": "Sign in and recover.",
+              "detail": "Proposed flow: email sign-in through the provider, SDK-managed session handling, verified API credentials and explicit expiry/recovery. Exact session persistence must be selected and tested before coding."
+            },
+            {
+              "nodeId": "permission",
+              "summary": "Viewer, reviewer, owner.",
+              "detail": "Enforce permitted actions server-side, including removed members and access to another workspace."
+            },
+            {
+              "nodeId": "policy",
+              "summary": "Check every operation.",
+              "detail": "Combine operation permission with resource ownership. Direct data/storage access also needs correctly tested provider policies."
+            },
+            {
+              "nodeId": "secret",
+              "summary": "Never in client bundles.",
+              "detail": "Keep privileged credentials in hosting configuration, rotate them and limit access. This plan contains no real secret values."
+            },
+            {
+              "nodeId": "boundary",
+              "summary": "Untrusted input boundary.",
+              "detail": "Validate requests and identity before entering privileged operations. Expired or invalid sessions return a recoverable sign-in path."
+            }
+          ],
+          "edges": [
+            {
+              "from": "auth",
+              "to": "boundary",
+              "label": "Present credential",
+              "detail": "Supabase Auth connects to Browser ↔ API: present credential.",
+              "style": "solid"
+            },
+            {
+              "from": "boundary",
+              "to": "permission",
+              "label": "Verify + authorize",
+              "detail": "Browser ↔ API connects to Workspace role: verify + authorize.",
+              "style": "solid"
+            },
+            {
+              "from": "permission",
+              "to": "policy",
+              "label": "Enforce action",
+              "detail": "Workspace role connects to Authorization policy: enforce action.",
+              "style": "solid"
+            },
+            {
+              "from": "secret",
+              "to": "policy",
+              "label": "Privileged operations",
+              "detail": "Server credentials connects to Authorization policy: privileged operations.",
+              "style": "solid"
+            }
+          ]
+        },
+        {
+          "id": "identity",
+          "title": "Identity / session",
+          "description": "Who is requesting access, and is the session valid?",
+          "color": "yellow",
+          "nodes": [
+            {
+              "nodeId": "auth",
+              "summary": "Sign in and recover.",
+              "detail": "Proposed flow: email sign-in through the provider, SDK-managed session handling, verified API credentials and explicit expiry/recovery. Exact session persistence must be selected and tested before coding."
+            },
+            {
+              "nodeId": "boundary",
+              "summary": "Untrusted input boundary.",
+              "detail": "Validate requests and identity before entering privileged operations. Expired or invalid sessions return a recoverable sign-in path."
+            }
+          ],
+          "edges": [
+            {
+              "from": "auth",
+              "to": "boundary",
+              "label": "Present credential",
+              "detail": "Supabase Auth connects to Browser ↔ API: present credential.",
+              "style": "solid"
+            }
+          ]
+        },
+        {
+          "id": "authorization",
+          "title": "Permissions",
+          "description": "Whether that identity may act on this resource.",
+          "color": "orange",
+          "nodes": [
+            {
+              "nodeId": "permission",
+              "summary": "Viewer, reviewer, owner.",
+              "detail": "Enforce permitted actions server-side, including removed members and access to another workspace."
+            },
+            {
+              "nodeId": "policy",
+              "summary": "Check every operation.",
+              "detail": "Combine operation permission with resource ownership. Direct data/storage access also needs correctly tested provider policies."
+            },
+            {
+              "nodeId": "secret",
+              "summary": "Never in client bundles.",
+              "detail": "Keep privileged credentials in hosting configuration, rotate them and limit access. This plan contains no real secret values."
+            },
+            {
+              "nodeId": "boundary",
+              "summary": "Untrusted input boundary.",
+              "detail": "Validate requests and identity before entering privileged operations. Expired or invalid sessions return a recoverable sign-in path."
+            }
+          ],
+          "edges": [
+            {
+              "from": "boundary",
+              "to": "permission",
+              "label": "Verify + authorize",
+              "detail": "Browser ↔ API connects to Workspace role: verify + authorize.",
+              "style": "solid"
+            },
+            {
+              "from": "permission",
+              "to": "policy",
+              "label": "Enforce action",
+              "detail": "Workspace role connects to Authorization policy: enforce action.",
+              "style": "solid"
+            },
+            {
+              "from": "secret",
+              "to": "policy",
+              "label": "Privileged operations",
+              "detail": "Server credentials connects to Authorization policy: privileged operations.",
+              "style": "solid"
+            }
+          ]
+        }
+      ],
+      "groups": []
+    },
+    {
+      "id": "operations",
+      "title": "How do we ship, observe and recover?",
+      "description": "No infrastructure is deployed by this plan. The release path needs a reproducible build, tested configuration and a recovery route.",
+      "nodes": [
+        {
+          "id": "deployment",
+          "label": "Staging → production",
+          "type": "deployment",
+          "column": 0,
+          "row": 0
+        },
+        {
+          "id": "server",
+          "label": "Render Node service",
+          "type": "server",
+          "column": 1,
+          "row": 0
+        },
+        {
+          "id": "network",
+          "label": "HTTPS ingress",
+          "type": "network",
+          "column": 2,
+          "row": 0
+        },
+        {
+          "id": "monitor",
+          "label": "Health and failures",
+          "type": "monitor",
+          "column": 0,
+          "row": 1
+        },
+        {
+          "id": "log",
+          "label": "Structured logs",
+          "type": "log",
+          "column": 1,
+          "row": 1
+        },
+        {
+          "id": "test",
+          "label": "Authorization rehearsal",
+          "type": "test",
+          "column": 2,
+          "row": 1
+        },
+        {
+          "id": "rollback",
+          "label": "Rollback / restore",
+          "type": "rollback",
+          "column": 0,
+          "row": 2
+        }
+      ],
+      "layers": [
+        {
+          "id": "whole",
+          "title": "Whole picture",
+          "description": "No infrastructure is deployed by this plan. The release path needs a reproducible build, tested configuration and a recovery route.",
+          "color": "green",
+          "nodes": [
+            {
+              "nodeId": "deployment",
+              "summary": "Promote a tested build.",
+              "detail": "Use an isolated preview, then a deliberate release with configuration and migration checks."
+            },
+            {
+              "nodeId": "server",
+              "summary": "Run the Fastify API.",
+              "detail": "Validate runtime, health checks and capacity in the selected region before committing."
+            },
+            {
+              "nodeId": "network",
+              "summary": "Route approved traffic.",
+              "detail": "Configure the actual origin, API access and transport settings; avoid assuming default networking is sufficient."
+            },
+            {
+              "nodeId": "monitor",
+              "summary": "Give alerts an owner.",
+              "detail": "Track meaningful errors and failed work, with a clear staff response."
+            },
+            {
+              "nodeId": "log",
+              "summary": "Trace without secrets.",
+              "detail": "Correlate requests and jobs; avoid credentials or private asset contents in logs."
+            },
+            {
+              "nodeId": "test",
+              "summary": "Try forbidden actions.",
+              "detail": "Test cross-workspace access, expired sessions, retries and stale asset versions."
+            },
+            {
+              "nodeId": "rollback",
+              "summary": "Rehearse before launch.",
+              "detail": "Document application rollback separately from recovering data after a bad migration."
+            }
+          ],
+          "edges": [
+            {
+              "from": "deployment",
+              "to": "server",
+              "label": "Runs build",
+              "detail": "Staging → production connects to Render Node service: runs build.",
+              "style": "solid"
+            },
+            {
+              "from": "network",
+              "to": "server",
+              "label": "Routes request",
+              "detail": "HTTPS ingress connects to Render Node service: routes request.",
+              "style": "solid"
+            },
+            {
+              "from": "server",
+              "to": "log",
+              "label": "Emits evidence",
+              "detail": "Render Node service connects to Structured logs: emits evidence.",
+              "style": "solid"
+            },
+            {
+              "from": "log",
+              "to": "monitor",
+              "label": "Detect problem",
+              "detail": "Structured logs connects to Health and failures: detect problem.",
+              "style": "solid"
+            },
+            {
+              "from": "test",
+              "to": "deployment",
+              "label": "Allows promotion",
+              "detail": "Authorization rehearsal connects to Staging → production: allows promotion.",
+              "style": "solid"
+            },
+            {
+              "from": "monitor",
+              "to": "rollback",
+              "label": "Escalate incident",
+              "detail": "Health and failures connects to Rollback / restore: escalate incident.",
+              "style": "solid"
+            },
+            {
+              "from": "rollback",
+              "to": "deployment",
+              "label": "Restore service",
+              "detail": "Rollback / restore connects to Staging → production: restore service.",
+              "style": "solid"
+            }
+          ]
+        }
+      ],
+      "groups": []
+    }
+  ]
+}

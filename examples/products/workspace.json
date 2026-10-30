@@ -1,0 +1,1051 @@
+{
+  "schemaVersion": 2,
+  "title": "Harbor \u2014 shared workspace plan",
+  "kind": "webapp",
+  "brief": "A fictional shared-workspace app with clear access rules and recoverable editing.",
+  "objective": "Help a small team organize shared projects and understand who can change them.",
+  "success": [
+    "Members can find their projects.",
+    "Owners can manage invitations.",
+    "A failed save never discards a draft."
+  ],
+  "scope": {
+    "now": [
+      "Projects, memberships and invitations."
+    ],
+    "later": [
+      "Optional exports and integrations."
+    ],
+    "out": [
+      "Billing, public publishing and live concurrent editing."
+    ]
+  },
+  "context": [
+    {
+      "id": "fictional",
+      "kind": "fact",
+      "detail": "This is synthetic demonstration data.",
+      "source": "Public Planboard fixture."
+    },
+    {
+      "id": "team-size",
+      "kind": "assumption",
+      "detail": "The first release serves a small team.",
+      "source": "Example scope, to be confirmed for a real project."
+    }
+  ],
+  "sourceDocument": {
+    "name": "Harbor-workspace-plan.md",
+    "sections": [
+      {
+        "id": "source-0",
+        "title": "Original example plan",
+        "content": "# Harbor workspace plan\n\nA fictional example for reviewing a small shared-workspace app.\n\n## A0. Baseline decisions\n\nMembers can view shared projects. Owners manage invitations.\n\n## A1. Architecture decisions\n\nA browser calls an API that checks membership before reading or changing data.\n\n## A2. Delivery and recovery\n\nTest access checks and preserve drafts after a failed save.\n"
+      }
+    ]
+  },
+  "technologies": [
+    {
+      "id": "database",
+      "name": "Relational database",
+      "role": "Store workspaces, memberships and project records.",
+      "status": "proposed",
+      "rationale": "Relational database has one clear responsibility in the workspace. Keep this boundary understandable and verify it with representative scenarios.",
+      "tradeoffs": "Each extra boundary adds operational work. Keep the first release small and document recovery before adding complexity.",
+      "alternatives": [
+        "Keep a simpler local implementation",
+        "Adopt a managed service if justified"
+      ],
+      "dependsOn": [],
+      "impacts": [
+        "Shared workspace journeys"
+      ],
+      "checks": [
+        "Verify permitted and denied access.",
+        "Exercise failures without losing user input."
+      ],
+      "source": "Fictional public demonstration, not an audit of an existing repository.",
+      "versionPlan": "Select supported versions during implementation.",
+      "fit": "complement",
+      "fitDetail": "Works alongside the other selected components.",
+      "choiceGroup": ""
+    },
+    {
+      "id": "backend",
+      "name": "Application API",
+      "role": "Validate requests and enforce workspace permissions.",
+      "status": "proposed",
+      "rationale": "Application API has one clear responsibility in the workspace. Keep this boundary understandable and verify it with representative scenarios.",
+      "tradeoffs": "Each extra boundary adds operational work. Keep the first release small and document recovery before adding complexity.",
+      "alternatives": [
+        "Keep a simpler local implementation",
+        "Adopt a managed service if justified"
+      ],
+      "dependsOn": [
+        "database"
+      ],
+      "impacts": [
+        "Shared workspace journeys"
+      ],
+      "checks": [
+        "Verify permitted and denied access.",
+        "Exercise failures without losing user input."
+      ],
+      "source": "Fictional public demonstration, not an audit of an existing repository.",
+      "versionPlan": "Select supported versions during implementation.",
+      "fit": "complement",
+      "fitDetail": "Works alongside the other selected components.",
+      "choiceGroup": ""
+    },
+    {
+      "id": "contracts",
+      "name": "Shared request contracts",
+      "role": "Describe the data exchanged by client and API.",
+      "status": "proposed",
+      "rationale": "Shared request contracts has one clear responsibility in the workspace. Keep this boundary understandable and verify it with representative scenarios.",
+      "tradeoffs": "Each extra boundary adds operational work. Keep the first release small and document recovery before adding complexity.",
+      "alternatives": [
+        "Keep a simpler local implementation",
+        "Adopt a managed service if justified"
+      ],
+      "dependsOn": [],
+      "impacts": [
+        "Shared workspace journeys"
+      ],
+      "checks": [
+        "Verify permitted and denied access.",
+        "Exercise failures without losing user input."
+      ],
+      "source": "Fictional public demonstration, not an audit of an existing repository.",
+      "versionPlan": "Select supported versions during implementation.",
+      "fit": "complement",
+      "fitDetail": "Works alongside the other selected components.",
+      "choiceGroup": ""
+    },
+    {
+      "id": "frontend",
+      "name": "Browser interface",
+      "role": "Present projects, invitations and recoverable forms.",
+      "status": "proposed",
+      "rationale": "Browser interface has one clear responsibility in the workspace. Keep this boundary understandable and verify it with representative scenarios.",
+      "tradeoffs": "Each extra boundary adds operational work. Keep the first release small and document recovery before adding complexity.",
+      "alternatives": [
+        "Keep a simpler local implementation",
+        "Adopt a managed service if justified"
+      ],
+      "dependsOn": [
+        "backend",
+        "contracts"
+      ],
+      "impacts": [
+        "Shared workspace journeys"
+      ],
+      "checks": [
+        "Verify permitted and denied access.",
+        "Exercise failures without losing user input."
+      ],
+      "source": "Fictional public demonstration, not an audit of an existing repository.",
+      "versionPlan": "Select supported versions during implementation.",
+      "fit": "complement",
+      "fitDetail": "Works alongside the other selected components.",
+      "choiceGroup": ""
+    },
+    {
+      "id": "sessions",
+      "name": "Session management",
+      "role": "Choose who owns sign-in and session expiry.",
+      "status": "proposed",
+      "rationale": "Session management has one clear responsibility in the workspace. Keep this boundary understandable and verify it with representative scenarios.",
+      "tradeoffs": "Each extra boundary adds operational work. Keep the first release small and document recovery before adding complexity.",
+      "alternatives": [
+        "Keep a simpler local implementation",
+        "Adopt a managed service if justified"
+      ],
+      "dependsOn": [
+        "backend"
+      ],
+      "impacts": [
+        "Shared workspace journeys"
+      ],
+      "checks": [
+        "Verify permitted and denied access.",
+        "Exercise failures without losing user input."
+      ],
+      "source": "Fictional public demonstration, not an audit of an existing repository.",
+      "versionPlan": "Select supported versions during implementation.",
+      "fit": "choice",
+      "fitDetail": "Choose according to the agreed scope.",
+      "choiceGroup": "sign-in"
+    },
+    {
+      "id": "async",
+      "name": "Background jobs",
+      "role": "Process optional exports outside a request.",
+      "status": "proposed",
+      "rationale": "Background jobs has one clear responsibility in the workspace. Keep this boundary understandable and verify it with representative scenarios.",
+      "tradeoffs": "Each extra boundary adds operational work. Keep the first release small and document recovery before adding complexity.",
+      "alternatives": [
+        "Keep a simpler local implementation",
+        "Adopt a managed service if justified"
+      ],
+      "dependsOn": [
+        "database"
+      ],
+      "impacts": [
+        "Shared workspace journeys"
+      ],
+      "checks": [
+        "Verify permitted and denied access.",
+        "Exercise failures without losing user input."
+      ],
+      "source": "Fictional public demonstration, not an audit of an existing repository.",
+      "versionPlan": "Select supported versions during implementation.",
+      "fit": "optional",
+      "fitDetail": "Choose according to the agreed scope.",
+      "choiceGroup": ""
+    },
+    {
+      "id": "release",
+      "name": "Release checks",
+      "role": "Verify behavior before shipping a version.",
+      "status": "proposed",
+      "rationale": "Release checks has one clear responsibility in the workspace. Keep this boundary understandable and verify it with representative scenarios.",
+      "tradeoffs": "Each extra boundary adds operational work. Keep the first release small and document recovery before adding complexity.",
+      "alternatives": [
+        "Keep a simpler local implementation",
+        "Adopt a managed service if justified"
+      ],
+      "dependsOn": [
+        "backend",
+        "frontend"
+      ],
+      "impacts": [
+        "Shared workspace journeys"
+      ],
+      "checks": [
+        "Verify permitted and denied access.",
+        "Exercise failures without losing user input."
+      ],
+      "source": "Fictional public demonstration, not an audit of an existing repository.",
+      "versionPlan": "Select supported versions during implementation.",
+      "fit": "complement",
+      "fitDetail": "Works alongside the other selected components.",
+      "choiceGroup": ""
+    },
+    {
+      "id": "adapters",
+      "name": "Optional integrations",
+      "role": "Connect a selected external service when needed.",
+      "status": "proposed",
+      "rationale": "Optional integrations has one clear responsibility in the workspace. Keep this boundary understandable and verify it with representative scenarios.",
+      "tradeoffs": "Each extra boundary adds operational work. Keep the first release small and document recovery before adding complexity.",
+      "alternatives": [
+        "Keep a simpler local implementation",
+        "Adopt a managed service if justified"
+      ],
+      "dependsOn": [
+        "backend"
+      ],
+      "impacts": [
+        "Shared workspace journeys"
+      ],
+      "checks": [
+        "Verify permitted and denied access.",
+        "Exercise failures without losing user input."
+      ],
+      "source": "Fictional public demonstration, not an audit of an existing repository.",
+      "versionPlan": "Select supported versions during implementation.",
+      "fit": "optional",
+      "fitDetail": "Choose according to the agreed scope.",
+      "choiceGroup": ""
+    }
+  ],
+  "steps": [
+    {
+      "id": "baseline",
+      "title": "Agree the access rules",
+      "summary": "Define members and owners.",
+      "why": "Permissions affect every shared action.",
+      "deliverable": "Examples of permitted and denied actions.",
+      "acceptance": [
+        "Review a member and an owner scenario."
+      ],
+      "dependsOn": [],
+      "status": "planned"
+    },
+    {
+      "id": "slice",
+      "title": "Build one complete project journey",
+      "summary": "Create, view and edit a project.",
+      "why": "One working journey exposes missing behavior.",
+      "deliverable": "A recoverable project editor.",
+      "acceptance": [
+        "A failed save preserves the draft."
+      ],
+      "dependsOn": [
+        "baseline"
+      ],
+      "status": "planned"
+    }
+  ],
+  "questions": [
+    {
+      "id": "session-owner",
+      "question": "Who should manage sign-in sessions?",
+      "why": "It determines the operational responsibilities.",
+      "recommendation": "Start with the simplest supported option for the team.",
+      "options": [
+        {
+          "label": "Managed identity",
+          "benefit": "Less sign-in infrastructure to operate.",
+          "tradeoff": "An external service becomes a dependency."
+        },
+        {
+          "label": "Application sessions",
+          "benefit": "One place for access policies.",
+          "tradeoff": "The team owns session maintenance."
+        }
+      ]
+    }
+  ],
+  "diagrams": [
+    {
+      "id": "core",
+      "title": "How a project is saved",
+      "description": "A fictional example: review the responsibilities and failure boundaries.",
+      "nodes": [
+        {
+          "id": "browser",
+          "label": "Project interface",
+          "type": "page",
+          "column": 0,
+          "row": 0
+        },
+        {
+          "id": "api",
+          "label": "Application API",
+          "type": "service",
+          "column": 1,
+          "row": 0
+        },
+        {
+          "id": "db",
+          "label": "Workspace data",
+          "type": "database",
+          "column": 2,
+          "row": 0
+        }
+      ],
+      "layers": [
+        {
+          "id": "flow",
+          "title": "Main flow",
+          "description": "Follow the normal user journey.",
+          "color": "blue",
+          "nodes": [
+            {
+              "nodeId": "browser",
+              "summary": "Project interface has a focused responsibility.",
+              "detail": "Review the relevant rules in A0 and A1 before implementation."
+            },
+            {
+              "nodeId": "api",
+              "summary": "Application API has a focused responsibility.",
+              "detail": "Review the relevant rules in A0 and A1 before implementation."
+            },
+            {
+              "nodeId": "db",
+              "summary": "Workspace data has a focused responsibility.",
+              "detail": "Review the relevant rules in A0 and A1 before implementation."
+            }
+          ],
+          "edges": [
+            {
+              "from": "browser",
+              "to": "api",
+              "label": "Send a change",
+              "detail": "The next responsibility receives the permitted operation.",
+              "style": "solid"
+            },
+            {
+              "from": "api",
+              "to": "db",
+              "label": "Save permitted data",
+              "detail": "The next responsibility receives the permitted operation.",
+              "style": "solid"
+            }
+          ]
+        },
+        {
+          "id": "checks",
+          "title": "Failure and recovery",
+          "description": "Verify each boundary before continuing.",
+          "color": "yellow",
+          "nodes": [
+            {
+              "nodeId": "browser",
+              "summary": "Check project interface.",
+              "detail": "Preserve work and give an understandable recovery action when this step fails."
+            },
+            {
+              "nodeId": "api",
+              "summary": "Check application api.",
+              "detail": "Preserve work and give an understandable recovery action when this step fails."
+            },
+            {
+              "nodeId": "db",
+              "summary": "Check workspace data.",
+              "detail": "Preserve work and give an understandable recovery action when this step fails."
+            }
+          ],
+          "edges": [
+            {
+              "from": "browser",
+              "to": "api",
+              "label": "Send a change",
+              "detail": "The next responsibility receives the permitted operation.",
+              "style": "dashed"
+            },
+            {
+              "from": "api",
+              "to": "db",
+              "label": "Save permitted data",
+              "detail": "The next responsibility receives the permitted operation.",
+              "style": "dashed"
+            }
+          ]
+        }
+      ],
+      "groups": [],
+      "walkthroughs": [
+        {
+          "id": "overview",
+          "title": "How a project is saved",
+          "kind": "journey",
+          "intro": "Follow the request through the system.",
+          "result": "The user sees a result or a recoverable error.",
+          "steps": [
+            {
+              "id": "step-1",
+              "title": "Send a change",
+              "explanation": "The next step happens only after the current responsibility has completed its check.",
+              "nodeIds": [
+                "browser",
+                "api"
+              ],
+              "edges": [
+                {
+                  "layerId": "flow",
+                  "from": "browser",
+                  "to": "api"
+                }
+              ]
+            },
+            {
+              "id": "step-2",
+              "title": "Save permitted data",
+              "explanation": "The next step happens only after the current responsibility has completed its check.",
+              "nodeIds": [
+                "api",
+                "db"
+              ],
+              "edges": [
+                {
+                  "layerId": "flow",
+                  "from": "api",
+                  "to": "db"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "access",
+      "title": "Who can open a project",
+      "description": "A fictional example: review the responsibilities and failure boundaries.",
+      "nodes": [
+        {
+          "id": "member",
+          "label": "Workspace member",
+          "type": "person",
+          "column": 0,
+          "row": 0
+        },
+        {
+          "id": "session",
+          "label": "Session check",
+          "type": "service",
+          "column": 1,
+          "row": 0
+        },
+        {
+          "id": "permission",
+          "label": "Membership rules",
+          "type": "service",
+          "column": 2,
+          "row": 0
+        }
+      ],
+      "layers": [
+        {
+          "id": "flow",
+          "title": "Main flow",
+          "description": "Follow the normal user journey.",
+          "color": "blue",
+          "nodes": [
+            {
+              "nodeId": "member",
+              "summary": "Workspace member has a focused responsibility.",
+              "detail": "Review the relevant rules in A0 and A1 before implementation."
+            },
+            {
+              "nodeId": "session",
+              "summary": "Session check has a focused responsibility.",
+              "detail": "Review the relevant rules in A0 and A1 before implementation."
+            },
+            {
+              "nodeId": "permission",
+              "summary": "Membership rules has a focused responsibility.",
+              "detail": "Review the relevant rules in A0 and A1 before implementation."
+            }
+          ],
+          "edges": [
+            {
+              "from": "member",
+              "to": "session",
+              "label": "Check sign-in",
+              "detail": "The next responsibility receives the permitted operation.",
+              "style": "solid"
+            },
+            {
+              "from": "session",
+              "to": "permission",
+              "label": "Verify membership",
+              "detail": "The next responsibility receives the permitted operation.",
+              "style": "solid"
+            }
+          ]
+        },
+        {
+          "id": "checks",
+          "title": "Failure and recovery",
+          "description": "Verify each boundary before continuing.",
+          "color": "yellow",
+          "nodes": [
+            {
+              "nodeId": "member",
+              "summary": "Check workspace member.",
+              "detail": "Preserve work and give an understandable recovery action when this step fails."
+            },
+            {
+              "nodeId": "session",
+              "summary": "Check session check.",
+              "detail": "Preserve work and give an understandable recovery action when this step fails."
+            },
+            {
+              "nodeId": "permission",
+              "summary": "Check membership rules.",
+              "detail": "Preserve work and give an understandable recovery action when this step fails."
+            }
+          ],
+          "edges": [
+            {
+              "from": "member",
+              "to": "session",
+              "label": "Check sign-in",
+              "detail": "The next responsibility receives the permitted operation.",
+              "style": "dashed"
+            },
+            {
+              "from": "session",
+              "to": "permission",
+              "label": "Verify membership",
+              "detail": "The next responsibility receives the permitted operation.",
+              "style": "dashed"
+            }
+          ]
+        }
+      ],
+      "groups": [],
+      "walkthroughs": [
+        {
+          "id": "overview",
+          "title": "Who can open a project",
+          "kind": "journey",
+          "intro": "Follow the request through the system.",
+          "result": "The user sees a result or a recoverable error.",
+          "steps": [
+            {
+              "id": "step-1",
+              "title": "Check sign-in",
+              "explanation": "The next step happens only after the current responsibility has completed its check.",
+              "nodeIds": [
+                "member",
+                "session"
+              ],
+              "edges": [
+                {
+                  "layerId": "flow",
+                  "from": "member",
+                  "to": "session"
+                }
+              ]
+            },
+            {
+              "id": "step-2",
+              "title": "Verify membership",
+              "explanation": "The next step happens only after the current responsibility has completed its check.",
+              "nodeIds": [
+                "session",
+                "permission"
+              ],
+              "edges": [
+                {
+                  "layerId": "flow",
+                  "from": "session",
+                  "to": "permission"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "statistics",
+      "title": "How activity is summarized",
+      "description": "A fictional example: review the responsibilities and failure boundaries.",
+      "nodes": [
+        {
+          "id": "event",
+          "label": "Project update",
+          "type": "event",
+          "column": 0,
+          "row": 0
+        },
+        {
+          "id": "summary",
+          "label": "Activity summary",
+          "type": "service",
+          "column": 1,
+          "row": 0
+        },
+        {
+          "id": "view",
+          "label": "Activity view",
+          "type": "page",
+          "column": 2,
+          "row": 0
+        }
+      ],
+      "layers": [
+        {
+          "id": "flow",
+          "title": "Main flow",
+          "description": "Follow the normal user journey.",
+          "color": "blue",
+          "nodes": [
+            {
+              "nodeId": "event",
+              "summary": "Project update has a focused responsibility.",
+              "detail": "Review the relevant rules in A0 and A1 before implementation."
+            },
+            {
+              "nodeId": "summary",
+              "summary": "Activity summary has a focused responsibility.",
+              "detail": "Review the relevant rules in A0 and A1 before implementation."
+            },
+            {
+              "nodeId": "view",
+              "summary": "Activity view has a focused responsibility.",
+              "detail": "Review the relevant rules in A0 and A1 before implementation."
+            }
+          ],
+          "edges": [
+            {
+              "from": "event",
+              "to": "summary",
+              "label": "Summarize changes",
+              "detail": "The next responsibility receives the permitted operation.",
+              "style": "solid"
+            },
+            {
+              "from": "summary",
+              "to": "view",
+              "label": "Show recent activity",
+              "detail": "The next responsibility receives the permitted operation.",
+              "style": "solid"
+            }
+          ]
+        },
+        {
+          "id": "checks",
+          "title": "Failure and recovery",
+          "description": "Verify each boundary before continuing.",
+          "color": "yellow",
+          "nodes": [
+            {
+              "nodeId": "event",
+              "summary": "Check project update.",
+              "detail": "Preserve work and give an understandable recovery action when this step fails."
+            },
+            {
+              "nodeId": "summary",
+              "summary": "Check activity summary.",
+              "detail": "Preserve work and give an understandable recovery action when this step fails."
+            },
+            {
+              "nodeId": "view",
+              "summary": "Check activity view.",
+              "detail": "Preserve work and give an understandable recovery action when this step fails."
+            }
+          ],
+          "edges": [
+            {
+              "from": "event",
+              "to": "summary",
+              "label": "Summarize changes",
+              "detail": "The next responsibility receives the permitted operation.",
+              "style": "dashed"
+            },
+            {
+              "from": "summary",
+              "to": "view",
+              "label": "Show recent activity",
+              "detail": "The next responsibility receives the permitted operation.",
+              "style": "dashed"
+            }
+          ]
+        }
+      ],
+      "groups": [],
+      "walkthroughs": [
+        {
+          "id": "overview",
+          "title": "How activity is summarized",
+          "kind": "journey",
+          "intro": "Follow the request through the system.",
+          "result": "The user sees a result or a recoverable error.",
+          "steps": [
+            {
+              "id": "step-1",
+              "title": "Summarize changes",
+              "explanation": "The next step happens only after the current responsibility has completed its check.",
+              "nodeIds": [
+                "event",
+                "summary"
+              ],
+              "edges": [
+                {
+                  "layerId": "flow",
+                  "from": "event",
+                  "to": "summary"
+                }
+              ]
+            },
+            {
+              "id": "step-2",
+              "title": "Show recent activity",
+              "explanation": "The next step happens only after the current responsibility has completed its check.",
+              "nodeIds": [
+                "summary",
+                "view"
+              ],
+              "edges": [
+                {
+                  "layerId": "flow",
+                  "from": "summary",
+                  "to": "view"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "delivery-roadmap",
+      "title": "Route to a working release",
+      "description": "A fictional example: review the responsibilities and failure boundaries.",
+      "nodes": [
+        {
+          "id": "baseline",
+          "label": "Baseline decisions",
+          "type": "task",
+          "column": 0,
+          "row": 0
+        },
+        {
+          "id": "build",
+          "label": "Project journey",
+          "type": "task",
+          "column": 1,
+          "row": 0
+        },
+        {
+          "id": "verify",
+          "label": "Verify recovery",
+          "type": "task",
+          "column": 2,
+          "row": 0
+        }
+      ],
+      "layers": [
+        {
+          "id": "flow",
+          "title": "Main flow",
+          "description": "Follow the normal user journey.",
+          "color": "blue",
+          "nodes": [
+            {
+              "nodeId": "baseline",
+              "summary": "Baseline decisions has a focused responsibility.",
+              "detail": "Review the relevant rules in A0 and A1 before implementation."
+            },
+            {
+              "nodeId": "build",
+              "summary": "Project journey has a focused responsibility.",
+              "detail": "Review the relevant rules in A0 and A1 before implementation."
+            },
+            {
+              "nodeId": "verify",
+              "summary": "Verify recovery has a focused responsibility.",
+              "detail": "Review the relevant rules in A0 and A1 before implementation."
+            }
+          ],
+          "edges": [
+            {
+              "from": "baseline",
+              "to": "build",
+              "label": "Agree A0 and A1",
+              "detail": "The next responsibility receives the permitted operation.",
+              "style": "solid"
+            },
+            {
+              "from": "build",
+              "to": "verify",
+              "label": "Check the result",
+              "detail": "The next responsibility receives the permitted operation.",
+              "style": "solid"
+            }
+          ]
+        },
+        {
+          "id": "checks",
+          "title": "Failure and recovery",
+          "description": "Verify each boundary before continuing.",
+          "color": "yellow",
+          "nodes": [
+            {
+              "nodeId": "baseline",
+              "summary": "Check baseline decisions.",
+              "detail": "Preserve work and give an understandable recovery action when this step fails."
+            },
+            {
+              "nodeId": "build",
+              "summary": "Check project journey.",
+              "detail": "Preserve work and give an understandable recovery action when this step fails."
+            },
+            {
+              "nodeId": "verify",
+              "summary": "Check verify recovery.",
+              "detail": "Preserve work and give an understandable recovery action when this step fails."
+            }
+          ],
+          "edges": [
+            {
+              "from": "baseline",
+              "to": "build",
+              "label": "Agree A0 and A1",
+              "detail": "The next responsibility receives the permitted operation.",
+              "style": "dashed"
+            },
+            {
+              "from": "build",
+              "to": "verify",
+              "label": "Check the result",
+              "detail": "The next responsibility receives the permitted operation.",
+              "style": "dashed"
+            }
+          ]
+        }
+      ],
+      "groups": [],
+      "walkthroughs": [
+        {
+          "id": "overview",
+          "title": "Route to a working release",
+          "kind": "journey",
+          "intro": "Follow the request through the system.",
+          "result": "The user sees a result or a recoverable error.",
+          "steps": [
+            {
+              "id": "step-1",
+              "title": "Agree A0 and A1",
+              "explanation": "The next step happens only after the current responsibility has completed its check.",
+              "nodeIds": [
+                "baseline",
+                "build"
+              ],
+              "edges": [
+                {
+                  "layerId": "flow",
+                  "from": "baseline",
+                  "to": "build"
+                }
+              ]
+            },
+            {
+              "id": "step-2",
+              "title": "Check the result",
+              "explanation": "The next step happens only after the current responsibility has completed its check.",
+              "nodeIds": [
+                "build",
+                "verify"
+              ],
+              "edges": [
+                {
+                  "layerId": "flow",
+                  "from": "build",
+                  "to": "verify"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "workflow": {
+    "name": "Example requirements review",
+    "instructions": [
+      "Review the fictional scope before implementation."
+    ]
+  },
+  "sections": [
+    {
+      "id": "product",
+      "title": "The product and its boundaries",
+      "summary": "Review what the first release should do.",
+      "collapsed": false,
+      "blocks": [
+        {
+          "id": "outcome",
+          "type": "field",
+          "path": "objective"
+        },
+        {
+          "id": "map",
+          "type": "diagrams",
+          "ids": [
+            "core"
+          ]
+        },
+        {
+          "id": "scope",
+          "type": "field",
+          "path": "scope/out"
+        }
+      ]
+    },
+    {
+      "id": "access",
+      "title": "Access and activity",
+      "collapsed": true,
+      "blocks": [
+        {
+          "id": "maps",
+          "type": "diagrams",
+          "ids": [
+            "access",
+            "statistics"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "route-to-cutover",
+      "title": "Route to a working release",
+      "collapsed": true,
+      "blocks": [
+        {
+          "id": "delivery",
+          "type": "diagrams",
+          "ids": [
+            "delivery-roadmap"
+          ]
+        },
+        {
+          "id": "packets-public",
+          "type": "table",
+          "title": "Delivery checks",
+          "columns": [
+            "Step",
+            "Result"
+          ],
+          "rows": [
+            {
+              "id": "baseline",
+              "cells": [
+                "A0",
+                "Agreed access rules"
+              ]
+            },
+            {
+              "id": "slice",
+              "cells": [
+                "A1",
+                "A recoverable project editor"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "tasks",
+          "type": "tasks",
+          "ids": [
+            "baseline",
+            "slice"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "technology",
+      "title": "Technology decisions",
+      "collapsed": true,
+      "blocks": [
+        {
+          "id": "choices",
+          "type": "technologies",
+          "ids": [
+            "database",
+            "backend",
+            "contracts",
+            "frontend",
+            "sessions",
+            "async",
+            "release",
+            "adapters"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "open",
+      "title": "Open questions",
+      "collapsed": true,
+      "blocks": [
+        {
+          "id": "questions",
+          "type": "decisions",
+          "ids": [
+            "session-owner"
+          ]
+        }
+      ]
+    }
+  ]
+}

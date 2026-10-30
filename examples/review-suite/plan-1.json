@@ -1,0 +1,1251 @@
+{
+  "schemaVersion": 1,
+  "title": "Canopy — dog shop website and local service",
+  "kind": "website",
+  "brief": "Review example 1 of 2: a fictional online dog shop with a physical store. Covers website, business and general-planning nodes. Product and operating claims are examples to validate.",
+  "objective": "Help customers choose suitable dog products, buy online or plan a useful store visit, while keeping staff work manageable.",
+  "success": [
+    "A reviewer can explain the main path and identify the unresolved choices.",
+    "Technology names, rationale and diagram nodes can be annotated individually.",
+    "No optional capability is silently treated as a launch requirement."
+  ],
+  "scope": {
+    "now": [
+      "Product browsing, product detail, cart and platform checkout.",
+      "Visit page, sizing support and honest product guidance.",
+      "One agreed stock owner and a launch workflow staff can operate."
+    ],
+    "later": [
+      "Only add optional capabilities after evidence supports them."
+    ],
+    "out": [
+      "Purchasing services, deploying systems or producing final creative assets during this review."
+    ]
+  },
+  "context": [
+    {
+      "id": "demo",
+      "kind": "fact",
+      "detail": "This is a fictional but concrete review plan created to exercise the planning toolkit and its node types.",
+      "source": "User request: create two or three plans covering the node catalogue."
+    },
+    {
+      "id": "constraints",
+      "kind": "unknown",
+      "detail": "Actual budget, team capacity, existing systems and delivery dates have not been supplied.",
+      "source": ""
+    },
+    {
+      "id": "proposal",
+      "kind": "assumption",
+      "detail": "Technology and production-tool choices below are reviewable proposals, not approved purchases.",
+      "source": ""
+    }
+  ],
+  "technologies": [
+    {
+      "id": "commerce",
+      "name": "Shopify — managed commerce",
+      "role": "Hosted catalogue, orders, checkout and platform data. No separate custom database/backend is proposed.",
+      "status": "proposed",
+      "rationale": "A managed starting option for a small shop if its existing system cannot support the goal.",
+      "tradeoffs": "Subscription, checkout constraints and integration fit need review; this is not a cost quote.",
+      "alternatives": [
+        "Reuse an existing capable commerce platform.",
+        "WooCommerce if the team already maintains WordPress."
+      ],
+      "dependsOn": [],
+      "impacts": [
+        "Products, variants, checkout, stock and order handling"
+      ],
+      "checks": [
+        "Verify country/payment availability and the existing till integration.",
+        "Run a test order, refund and stock reconciliation."
+      ],
+      "source": "https://shopify.dev/docs/storefronts/themes/architecture — architecture reviewed 2026-10-25.",
+      "versionPlan": "No versions are fabricated or installed in this planning example. Before implementation, inspect existing manifests, choose compatible supported releases, record exact versions in the lockfile, and test updates."
+    },
+    {
+      "id": "theme",
+      "name": "Liquid + HTML/CSS + small JavaScript modules",
+      "role": "Reusable theme sections and custom branded controls.",
+      "status": "proposed",
+      "rationale": "Uses the commerce platform’s page model without adding a second frontend application.",
+      "tradeoffs": "Platform template constraints; custom interactions still need keyboard and mobile testing.",
+      "alternatives": [
+        "A suitable existing theme with scoped customization.",
+        "Astro/headless storefront only if a specific need outweighs integration cost."
+      ],
+      "dependsOn": [
+        "commerce"
+      ],
+      "impacts": [
+        "Navigation, section layouts, components and cart interactions"
+      ],
+      "checks": [
+        "Inspect and reuse current theme tokens/components.",
+        "Verify form states, focus and mobile checkout entry."
+      ],
+      "source": "https://shopify.dev/docs/storefronts/themes/architecture",
+      "versionPlan": "No versions are fabricated or installed in this planning example. Before implementation, inspect existing manifests, choose compatible supported releases, record exact versions in the lockfile, and test updates."
+    },
+    {
+      "id": "staff-login",
+      "name": "Shopify staff accounts + two-step authentication",
+      "role": "Staff identity and role-based administration. Guest buying is the proposed customer path.",
+      "status": "proposed",
+      "rationale": "Reuses the managed administration login instead of building a parallel password database.",
+      "tradeoffs": "Recovery, account ownership and least-privilege roles must be configured and rehearsed.",
+      "alternatives": [
+        "Existing platform-managed staff identity.",
+        "Customer accounts deferred until a repeat-customer task needs them."
+      ],
+      "dependsOn": [
+        "commerce"
+      ],
+      "impacts": [
+        "Staff access, handover, recovery and account offboarding"
+      ],
+      "checks": [
+        "Test loss of access and approved recovery.",
+        "Verify a content editor cannot administer unrelated sensitive settings."
+      ],
+      "source": "https://help.shopify.com/en/manual/your-account/users/security/two-step-authentication",
+      "versionPlan": "No versions are fabricated or installed in this planning example. Before implementation, inspect existing manifests, choose compatible supported releases, record exact versions in the lockfile, and test updates."
+    },
+    {
+      "id": "quality",
+      "name": "Theme checks + Playwright + axe-core",
+      "role": "Local validation and browser checks on changed journeys.",
+      "status": "proposed",
+      "rationale": "Tests buying and staff handoff behavior rather than just screenshots.",
+      "tradeoffs": "Automation cannot establish whether copy is persuasive or product advice is correct.",
+      "alternatives": [
+        "Reuse existing project checks."
+      ],
+      "dependsOn": [
+        "theme",
+        "staff-login"
+      ],
+      "impacts": [
+        "Release verification and regression tests"
+      ],
+      "checks": [
+        "Test validation, reset, keyboard use and error recovery.",
+        "Review real mobile renderings and contrast."
+      ],
+      "source": "Proposed test stack; use the existing installed web-quality toolkit where applicable.",
+      "versionPlan": "No versions are fabricated or installed in this planning example. Before implementation, inspect existing manifests, choose compatible supported releases, record exact versions in the lockfile, and test updates."
+    }
+  ],
+  "steps": [
+    {
+      "id": "confirm",
+      "title": "Confirm the real shop setup",
+      "summary": "Inspect existing commerce/till tools, staff capacity and unresolved business facts.",
+      "why": "Inspect existing commerce/till tools, staff capacity and unresolved business facts.",
+      "deliverable": "Confirm the real shop setup — reviewable result",
+      "acceptance": [
+        "Demonstrate the described outcome with realistic examples.",
+        "Resolve relevant annotations before treating this step as reviewed."
+      ],
+      "dependsOn": [],
+      "status": "planned"
+    },
+    {
+      "id": "structure",
+      "title": "Review pages and content",
+      "summary": "Agree page hierarchy, section purposes and verified content.",
+      "why": "Agree page hierarchy, section purposes and verified content.",
+      "deliverable": "Review pages and content — reviewable result",
+      "acceptance": [
+        "Demonstrate the described outcome with realistic examples.",
+        "Resolve relevant annotations before treating this step as reviewed."
+      ],
+      "dependsOn": [
+        "confirm"
+      ],
+      "status": "planned"
+    },
+    {
+      "id": "theme",
+      "title": "Build reusable theme sections",
+      "summary": "Reuse approved controls, tokens and layouts.",
+      "why": "Reuse approved controls, tokens and layouts.",
+      "deliverable": "Build reusable theme sections — reviewable result",
+      "acceptance": [
+        "Demonstrate the described outcome with realistic examples.",
+        "Resolve relevant annotations before treating this step as reviewed."
+      ],
+      "dependsOn": [
+        "structure"
+      ],
+      "status": "planned"
+    },
+    {
+      "id": "operations",
+      "title": "Connect stock and checkout",
+      "summary": "Configure the selected platform and rehearse staff operations.",
+      "why": "Configure the selected platform and rehearse staff operations.",
+      "deliverable": "Connect stock and checkout — reviewable result",
+      "acceptance": [
+        "Demonstrate the described outcome with realistic examples.",
+        "Resolve relevant annotations before treating this step as reviewed."
+      ],
+      "dependsOn": [
+        "confirm"
+      ],
+      "status": "planned"
+    },
+    {
+      "id": "verify",
+      "title": "Test buying and visiting",
+      "summary": "Verify purchase, help and store-visit paths on mobile and desktop.",
+      "why": "Verify purchase, help and store-visit paths on mobile and desktop.",
+      "deliverable": "Test buying and visiting — reviewable result",
+      "acceptance": [
+        "Demonstrate the described outcome with realistic examples.",
+        "Resolve relevant annotations before treating this step as reviewed."
+      ],
+      "dependsOn": [
+        "theme",
+        "operations"
+      ],
+      "status": "planned"
+    }
+  ],
+  "questions": [
+    {
+      "id": "platform-choice",
+      "question": "Keep the proposed Shopify approach or reuse another platform?",
+      "why": "This changes templates, checkout, staff login and integration work.",
+      "recommendation": "Confirm the fit with your actual constraints before implementation.",
+      "options": [
+        {
+          "label": "Evaluate Shopify",
+          "benefit": "Fits the proposed starting scope.",
+          "tradeoff": "Still requires the checks listed in this plan."
+        },
+        {
+          "label": "Reuse current platform",
+          "benefit": "Keeps the alternative available.",
+          "tradeoff": "Revisit affected technology and delivery decisions."
+        }
+      ]
+    },
+    {
+      "id": "pickup-choice",
+      "question": "Include pickup at launch?",
+      "why": "Pickup requires reliable staff reservation and handover.",
+      "recommendation": "Confirm the fit with your actual constraints before implementation.",
+      "options": [
+        {
+          "label": "Shipping and ordinary visits first",
+          "benefit": "Fits the proposed starting scope.",
+          "tradeoff": "Still requires the checks listed in this plan."
+        },
+        {
+          "label": "Include pickup",
+          "benefit": "Keeps the alternative available.",
+          "tradeoff": "Revisit affected technology and delivery decisions."
+        }
+      ]
+    }
+  ],
+  "diagrams": [
+    {
+      "id": "purpose",
+      "title": "Who is this for, and what counts as success?",
+      "description": "Start with the customer task and a bounded launch, not a long feature wishlist.",
+      "nodes": [
+        {
+          "id": "person",
+          "label": "Dog owner",
+          "type": "person",
+          "column": 0,
+          "row": 0
+        },
+        {
+          "id": "goal",
+          "label": "Suitable purchase",
+          "type": "goal",
+          "column": 1,
+          "row": 0
+        },
+        {
+          "id": "requirement",
+          "label": "Clear product facts",
+          "type": "requirement",
+          "column": 2,
+          "row": 0
+        },
+        {
+          "id": "constraint",
+          "label": "Staff capacity",
+          "type": "constraint",
+          "column": 0,
+          "row": 1
+        },
+        {
+          "id": "risk",
+          "label": "Stock mismatch",
+          "type": "risk",
+          "column": 1,
+          "row": 1
+        },
+        {
+          "id": "question",
+          "label": "Which till exists?",
+          "type": "question",
+          "column": 2,
+          "row": 1
+        }
+      ],
+      "layers": [
+        {
+          "id": "whole",
+          "title": "Whole picture",
+          "description": "Start with the customer task and a bounded launch, not a long feature wishlist.",
+          "color": "green",
+          "nodes": [
+            {
+              "nodeId": "person",
+              "summary": "Choose with confidence.",
+              "detail": "The customer needs accurate sizing, price and availability before committing."
+            },
+            {
+              "nodeId": "goal",
+              "summary": "Buy or visit successfully.",
+              "detail": "Success means a suitable product decision and a completed purchase or informed visit; revenue targets need a real baseline."
+            },
+            {
+              "nodeId": "requirement",
+              "summary": "Sizes, price, availability.",
+              "detail": "Use verified product information and real return/delivery terms."
+            },
+            {
+              "nodeId": "constraint",
+              "summary": "Keep upkeep realistic.",
+              "detail": "The actual budget and capacity remain unknown; confirm them before selecting add-ons."
+            },
+            {
+              "nodeId": "risk",
+              "summary": "Avoid false availability.",
+              "detail": "Online and physical sales may compete for stock; reconcile ownership before launch."
+            },
+            {
+              "nodeId": "question",
+              "summary": "Inspect before choosing.",
+              "detail": "Ask for the existing till and stock system. This answer can change the platform recommendation."
+            }
+          ],
+          "edges": [
+            {
+              "from": "person",
+              "to": "goal",
+              "label": "Needs",
+              "detail": "Dog owner connects to Suitable purchase: needs.",
+              "style": "solid"
+            },
+            {
+              "from": "goal",
+              "to": "requirement",
+              "label": "Requires",
+              "detail": "Suitable purchase connects to Clear product facts: requires.",
+              "style": "solid"
+            },
+            {
+              "from": "constraint",
+              "to": "requirement",
+              "label": "Bounds",
+              "detail": "Staff capacity connects to Clear product facts: bounds.",
+              "style": "solid"
+            },
+            {
+              "from": "question",
+              "to": "risk",
+              "label": "Clarifies",
+              "detail": "Which till exists? connects to Stock mismatch: clarifies.",
+              "style": "solid"
+            },
+            {
+              "from": "risk",
+              "to": "goal",
+              "label": "May block",
+              "detail": "Stock mismatch connects to Suitable purchase: may block.",
+              "style": "solid"
+            }
+          ]
+        },
+        {
+          "id": "customer",
+          "title": "Customer view",
+          "description": "The value the customer should get.",
+          "color": "yellow",
+          "nodes": [
+            {
+              "nodeId": "person",
+              "summary": "Choose with confidence.",
+              "detail": "The customer needs accurate sizing, price and availability before committing."
+            },
+            {
+              "nodeId": "goal",
+              "summary": "Buy or visit successfully.",
+              "detail": "Success means a suitable product decision and a completed purchase or informed visit; revenue targets need a real baseline."
+            },
+            {
+              "nodeId": "requirement",
+              "summary": "Sizes, price, availability.",
+              "detail": "Use verified product information and real return/delivery terms."
+            }
+          ],
+          "edges": [
+            {
+              "from": "person",
+              "to": "goal",
+              "label": "Needs",
+              "detail": "Dog owner connects to Suitable purchase: needs.",
+              "style": "solid"
+            },
+            {
+              "from": "goal",
+              "to": "requirement",
+              "label": "Requires",
+              "detail": "Suitable purchase connects to Clear product facts: requires.",
+              "style": "solid"
+            }
+          ]
+        },
+        {
+          "id": "limits",
+          "title": "Constraints",
+          "description": "The unknowns that can change the plan.",
+          "color": "orange",
+          "nodes": [
+            {
+              "nodeId": "constraint",
+              "summary": "Keep upkeep realistic.",
+              "detail": "The actual budget and capacity remain unknown; confirm them before selecting add-ons."
+            },
+            {
+              "nodeId": "risk",
+              "summary": "Avoid false availability.",
+              "detail": "Online and physical sales may compete for stock; reconcile ownership before launch."
+            },
+            {
+              "nodeId": "question",
+              "summary": "Inspect before choosing.",
+              "detail": "Ask for the existing till and stock system. This answer can change the platform recommendation."
+            }
+          ],
+          "edges": [
+            {
+              "from": "question",
+              "to": "risk",
+              "label": "Clarifies",
+              "detail": "Which till exists? connects to Stock mismatch: clarifies.",
+              "style": "solid"
+            }
+          ]
+        }
+      ],
+      "groups": []
+    },
+    {
+      "id": "delivery-decisions",
+      "title": "How do we decide and hand over?",
+      "description": "A custom fitting consultation is shown as a domain-specific type so you can inspect its inherited styling.",
+      "nodes": [
+        {
+          "id": "decision",
+          "label": "Choose launch scope",
+          "type": "decision",
+          "column": 0,
+          "row": 0
+        },
+        {
+          "id": "task",
+          "label": "Prepare launch content",
+          "type": "task",
+          "column": 1,
+          "row": 0
+        },
+        {
+          "id": "deliverable",
+          "label": "Reviewed storefront",
+          "type": "deliverable",
+          "column": 2,
+          "row": 0
+        },
+        {
+          "id": "milestone",
+          "label": "Owner review",
+          "type": "milestone",
+          "column": 0,
+          "row": 1
+        },
+        {
+          "id": "note",
+          "label": "Assumptions remain",
+          "type": "note",
+          "column": 1,
+          "row": 1
+        },
+        {
+          "id": "custom",
+          "label": "Fit consultation",
+          "type": "custom",
+          "column": 2,
+          "row": 1,
+          "customType": {
+            "label": "Fit consultation",
+            "description": "A shop-specific fitting consultation with owner consent and a trained staff member.",
+            "baseType": "task"
+          }
+        }
+      ],
+      "layers": [
+        {
+          "id": "whole",
+          "title": "Whole picture",
+          "description": "A custom fitting consultation is shown as a domain-specific type so you can inspect its inherited styling.",
+          "color": "green",
+          "nodes": [
+            {
+              "nodeId": "decision",
+              "summary": "Shipping first or pickup too?",
+              "detail": "Pickup needs staff reservation and ready-to-collect handling. It is optional until confirmed."
+            },
+            {
+              "nodeId": "task",
+              "summary": "Gather real products.",
+              "detail": "Assign an owner for names, prices, variants, photos and policies."
+            },
+            {
+              "nodeId": "deliverable",
+              "summary": "A usable launch candidate.",
+              "detail": "A preview with real content and working test purchase paths."
+            },
+            {
+              "nodeId": "milestone",
+              "summary": "Review before launch.",
+              "detail": "The owner checks operations and unresolved annotations; accepting the plan is not a deployment command."
+            },
+            {
+              "nodeId": "note",
+              "summary": "No invented business facts.",
+              "detail": "This is a demonstration brand. Location, budget and real product claims are intentionally unresolved."
+            },
+            {
+              "nodeId": "custom",
+              "summary": "A trained fitting visit.",
+              "detail": "Proposed shop-specific service: record the fit outcome and consent; do not imply veterinary advice."
+            }
+          ],
+          "edges": [
+            {
+              "from": "decision",
+              "to": "task",
+              "label": "Sets scope",
+              "detail": "Choose launch scope connects to Prepare launch content: sets scope.",
+              "style": "solid"
+            },
+            {
+              "from": "task",
+              "to": "deliverable",
+              "label": "Produces",
+              "detail": "Prepare launch content connects to Reviewed storefront: produces.",
+              "style": "solid"
+            },
+            {
+              "from": "deliverable",
+              "to": "milestone",
+              "label": "Reviewed at",
+              "detail": "Reviewed storefront connects to Owner review: reviewed at.",
+              "style": "solid"
+            },
+            {
+              "from": "note",
+              "to": "decision",
+              "label": "Qualifies",
+              "detail": "Assumptions remain connects to Choose launch scope: qualifies.",
+              "style": "solid"
+            },
+            {
+              "from": "custom",
+              "to": "decision",
+              "label": "Optional service",
+              "detail": "Fit consultation connects to Choose launch scope: optional service.",
+              "style": "dashed"
+            }
+          ]
+        }
+      ],
+      "groups": []
+    },
+    {
+      "id": "shopping",
+      "title": "What does the shopping page need?",
+      "description": "The section breakdown explains purpose and reusable components without pretending to be an editable wireframe.",
+      "nodes": [
+        {
+          "id": "page",
+          "label": "Shop homepage",
+          "type": "page",
+          "column": 0,
+          "row": 0
+        },
+        {
+          "id": "navigation",
+          "label": "Browse / visit / help",
+          "type": "navigation",
+          "column": 1,
+          "row": 0
+        },
+        {
+          "id": "section",
+          "label": "Product introduction",
+          "type": "section",
+          "column": 2,
+          "row": 0
+        },
+        {
+          "id": "component",
+          "label": "Product card",
+          "type": "component",
+          "column": 0,
+          "row": 1
+        },
+        {
+          "id": "search",
+          "label": "Find a product",
+          "type": "search",
+          "column": 1,
+          "row": 1
+        },
+        {
+          "id": "cta",
+          "label": "Choose a size",
+          "type": "cta",
+          "column": 2,
+          "row": 1
+        }
+      ],
+      "layers": [
+        {
+          "id": "whole",
+          "title": "Whole picture",
+          "description": "The section breakdown explains purpose and reusable components without pretending to be an editable wireframe.",
+          "color": "green",
+          "nodes": [
+            {
+              "nodeId": "page",
+              "summary": "Choose buy or visit.",
+              "detail": "Make the two primary customer tasks easy to find."
+            },
+            {
+              "nodeId": "navigation",
+              "summary": "Use familiar destinations.",
+              "detail": "Keep product categories, local details and help reachable with clear labels."
+            },
+            {
+              "nodeId": "section",
+              "summary": "Explain value and fit.",
+              "detail": "Show the product in use, a concise promise and the next action."
+            },
+            {
+              "nodeId": "component",
+              "summary": "Reuse one visual system.",
+              "detail": "One component handles image, name, price, stock and focus states across lists."
+            },
+            {
+              "nodeId": "search",
+              "summary": "Search and filter clearly.",
+              "detail": "Provide meaningful results, clear filters and a useful empty state."
+            },
+            {
+              "nodeId": "cta",
+              "summary": "A concrete next step.",
+              "detail": "The action leads to a product choice, not an unexplained promotional detour."
+            }
+          ],
+          "edges": [
+            {
+              "from": "page",
+              "to": "navigation",
+              "label": "Offers routes",
+              "detail": "Shop homepage connects to Browse / visit / help: offers routes.",
+              "style": "solid"
+            },
+            {
+              "from": "page",
+              "to": "section",
+              "label": "Introduces",
+              "detail": "Shop homepage connects to Product introduction: introduces.",
+              "style": "solid"
+            },
+            {
+              "from": "section",
+              "to": "component",
+              "label": "Shows products",
+              "detail": "Product introduction connects to Product card: shows products.",
+              "style": "solid"
+            },
+            {
+              "from": "navigation",
+              "to": "search",
+              "label": "Find items",
+              "detail": "Browse / visit / help connects to Find a product: find items.",
+              "style": "solid"
+            },
+            {
+              "from": "component",
+              "to": "cta",
+              "label": "Choose product",
+              "detail": "Product card connects to Choose a size: choose product.",
+              "style": "solid"
+            }
+          ]
+        },
+        {
+          "id": "layout",
+          "title": "Page structure",
+          "description": "What each section contributes.",
+          "color": "yellow",
+          "nodes": [
+            {
+              "nodeId": "page",
+              "summary": "Choose buy or visit.",
+              "detail": "Make the two primary customer tasks easy to find."
+            },
+            {
+              "nodeId": "navigation",
+              "summary": "Use familiar destinations.",
+              "detail": "Keep product categories, local details and help reachable with clear labels."
+            },
+            {
+              "nodeId": "section",
+              "summary": "Explain value and fit.",
+              "detail": "Show the product in use, a concise promise and the next action."
+            },
+            {
+              "nodeId": "component",
+              "summary": "Reuse one visual system.",
+              "detail": "One component handles image, name, price, stock and focus states across lists."
+            }
+          ],
+          "edges": [
+            {
+              "from": "page",
+              "to": "navigation",
+              "label": "Offers routes",
+              "detail": "Shop homepage connects to Browse / visit / help: offers routes.",
+              "style": "solid"
+            },
+            {
+              "from": "page",
+              "to": "section",
+              "label": "Introduces",
+              "detail": "Shop homepage connects to Product introduction: introduces.",
+              "style": "solid"
+            },
+            {
+              "from": "section",
+              "to": "component",
+              "label": "Shows products",
+              "detail": "Product introduction connects to Product card: shows products.",
+              "style": "solid"
+            }
+          ]
+        },
+        {
+          "id": "actions",
+          "title": "Customer actions",
+          "description": "What the visitor can do next.",
+          "color": "orange",
+          "nodes": [
+            {
+              "nodeId": "navigation",
+              "summary": "Use familiar destinations.",
+              "detail": "Keep product categories, local details and help reachable with clear labels."
+            },
+            {
+              "nodeId": "component",
+              "summary": "Reuse one visual system.",
+              "detail": "One component handles image, name, price, stock and focus states across lists."
+            },
+            {
+              "nodeId": "search",
+              "summary": "Search and filter clearly.",
+              "detail": "Provide meaningful results, clear filters and a useful empty state."
+            },
+            {
+              "nodeId": "cta",
+              "summary": "A concrete next step.",
+              "detail": "The action leads to a product choice, not an unexplained promotional detour."
+            }
+          ],
+          "edges": [
+            {
+              "from": "navigation",
+              "to": "search",
+              "label": "Find items",
+              "detail": "Browse / visit / help connects to Find a product: find items.",
+              "style": "solid"
+            },
+            {
+              "from": "component",
+              "to": "cta",
+              "label": "Choose product",
+              "detail": "Product card connects to Choose a size: choose product.",
+              "style": "solid"
+            }
+          ]
+        }
+      ],
+      "groups": []
+    },
+    {
+      "id": "confidence",
+      "title": "What helps someone choose or ask for help?",
+      "description": "Content earns its place by answering a customer question. Proof must be genuine.",
+      "nodes": [
+        {
+          "id": "content",
+          "label": "Sizing guide",
+          "type": "content",
+          "column": 0,
+          "row": 0
+        },
+        {
+          "id": "form",
+          "label": "Ask the shop",
+          "type": "form",
+          "column": 1,
+          "row": 0
+        },
+        {
+          "id": "proof",
+          "label": "Verified feedback",
+          "type": "proof",
+          "column": 2,
+          "row": 0
+        },
+        {
+          "id": "pricing",
+          "label": "Price and delivery",
+          "type": "pricing",
+          "column": 0,
+          "row": 1
+        },
+        {
+          "id": "faq",
+          "label": "Returns and pickup",
+          "type": "faq",
+          "column": 1,
+          "row": 1
+        }
+      ],
+      "layers": [
+        {
+          "id": "whole",
+          "title": "Whole picture",
+          "description": "Content earns its place by answering a customer question. Proof must be genuine.",
+          "color": "green",
+          "nodes": [
+            {
+              "nodeId": "content",
+              "summary": "Use measured examples.",
+              "detail": "Explain how to measure and choose a fit using owner-verified product guidance."
+            },
+            {
+              "nodeId": "form",
+              "summary": "Preserve the question.",
+              "detail": "Collect only needed contact/context and show success, validation and retry states."
+            },
+            {
+              "nodeId": "proof",
+              "summary": "Real experiences only.",
+              "detail": "Use actual approved customer feedback, never invented ratings or names."
+            },
+            {
+              "nodeId": "pricing",
+              "summary": "Show the full promise.",
+              "detail": "Disclose relevant prices and delivery conditions before the purchase decision."
+            },
+            {
+              "nodeId": "faq",
+              "summary": "Answer real objections.",
+              "detail": "Explain confirmed return and pickup behavior; do not invent policies."
+            }
+          ],
+          "edges": [
+            {
+              "from": "content",
+              "to": "form",
+              "label": "Still unsure?",
+              "detail": "Sizing guide connects to Ask the shop: still unsure?.",
+              "style": "solid"
+            },
+            {
+              "from": "proof",
+              "to": "pricing",
+              "label": "Supports confidence",
+              "detail": "Verified feedback connects to Price and delivery: supports confidence.",
+              "style": "solid"
+            },
+            {
+              "from": "pricing",
+              "to": "faq",
+              "label": "Clarify terms",
+              "detail": "Price and delivery connects to Returns and pickup: clarify terms.",
+              "style": "solid"
+            },
+            {
+              "from": "faq",
+              "to": "form",
+              "label": "Ask for help",
+              "detail": "Returns and pickup connects to Ask the shop: ask for help.",
+              "style": "solid"
+            }
+          ]
+        }
+      ],
+      "groups": []
+    },
+    {
+      "id": "commerce",
+      "title": "Who owns the sale and the fulfilment?",
+      "description": "This is the operating model behind the website. Confirm the real owners before implementing it.",
+      "nodes": [
+        {
+          "id": "customer",
+          "label": "Customer segment",
+          "type": "customer",
+          "column": 0,
+          "row": 0
+        },
+        {
+          "id": "product",
+          "label": "Launch catalogue",
+          "type": "product",
+          "column": 1,
+          "row": 0
+        },
+        {
+          "id": "payment",
+          "label": "Platform checkout",
+          "type": "payment",
+          "column": 2,
+          "row": 0
+        },
+        {
+          "id": "order",
+          "label": "Paid order",
+          "type": "order",
+          "column": 0,
+          "row": 1
+        },
+        {
+          "id": "inventory",
+          "label": "Stock owner",
+          "type": "inventory",
+          "column": 1,
+          "row": 1
+        },
+        {
+          "id": "team",
+          "label": "Shop team",
+          "type": "team",
+          "column": 2,
+          "row": 1
+        },
+        {
+          "id": "supplier",
+          "label": "Product supplier",
+          "type": "supplier",
+          "column": 0,
+          "row": 2
+        },
+        {
+          "id": "channel",
+          "label": "Online and in-store",
+          "type": "channel",
+          "column": 1,
+          "row": 2
+        },
+        {
+          "id": "metric",
+          "label": "Completed journeys",
+          "type": "metric",
+          "column": 2,
+          "row": 2
+        },
+        {
+          "id": "budget",
+          "label": "Operating costs",
+          "type": "budget",
+          "column": 0,
+          "row": 3
+        }
+      ],
+      "layers": [
+        {
+          "id": "whole",
+          "title": "Whole picture",
+          "description": "This is the operating model behind the website. Confirm the real owners before implementing it.",
+          "color": "green",
+          "nodes": [
+            {
+              "nodeId": "customer",
+              "summary": "Dog owners needing fit.",
+              "detail": "A provisional audience description; validate against actual store visitors."
+            },
+            {
+              "nodeId": "product",
+              "summary": "A manageable range.",
+              "detail": "Choose the real product range and variants with staff."
+            },
+            {
+              "nodeId": "payment",
+              "summary": "Use managed payment.",
+              "detail": "Payment outcome comes from the platform, not a browser success screen."
+            },
+            {
+              "nodeId": "order",
+              "summary": "A fulfilment commitment.",
+              "detail": "Staff see the recorded order and agreed fulfilment method."
+            },
+            {
+              "nodeId": "inventory",
+              "summary": "One agreed source.",
+              "detail": "Define which system owns stock and when reservations and returns update it."
+            },
+            {
+              "nodeId": "team",
+              "summary": "Pack and support.",
+              "detail": "Assign order handling, content upkeep and escalation responsibility."
+            },
+            {
+              "nodeId": "supplier",
+              "summary": "Reliable product inputs.",
+              "detail": "Confirm lead times and product information instead of guessing availability."
+            },
+            {
+              "nodeId": "channel",
+              "summary": "Two connected routes.",
+              "detail": "Plan how someone discovers, buys and gets help across channels."
+            },
+            {
+              "nodeId": "metric",
+              "summary": "Measure useful outcomes.",
+              "detail": "Track successful orders and useful store enquiries with an agreed measurement approach."
+            },
+            {
+              "nodeId": "budget",
+              "summary": "Confirm recurring spend.",
+              "detail": "Compare platform, app, payment and support costs after the actual setup is known."
+            }
+          ],
+          "edges": [
+            {
+              "from": "customer",
+              "to": "product",
+              "label": "Chooses",
+              "detail": "Customer segment connects to Launch catalogue: chooses.",
+              "style": "solid"
+            },
+            {
+              "from": "product",
+              "to": "payment",
+              "label": "Buys",
+              "detail": "Launch catalogue connects to Platform checkout: buys.",
+              "style": "solid"
+            },
+            {
+              "from": "payment",
+              "to": "order",
+              "label": "Records outcome",
+              "detail": "Platform checkout connects to Paid order: records outcome.",
+              "style": "solid"
+            },
+            {
+              "from": "order",
+              "to": "team",
+              "label": "Fulfil",
+              "detail": "Paid order connects to Shop team: fulfil.",
+              "style": "solid"
+            },
+            {
+              "from": "inventory",
+              "to": "order",
+              "label": "Reserve stock",
+              "detail": "Stock owner connects to Paid order: reserve stock.",
+              "style": "solid"
+            },
+            {
+              "from": "supplier",
+              "to": "inventory",
+              "label": "Replenish",
+              "detail": "Product supplier connects to Stock owner: replenish.",
+              "style": "solid"
+            },
+            {
+              "from": "channel",
+              "to": "customer",
+              "label": "Reaches",
+              "detail": "Online and in-store connects to Customer segment: reaches.",
+              "style": "solid"
+            },
+            {
+              "from": "order",
+              "to": "metric",
+              "label": "Measure outcome",
+              "detail": "Paid order connects to Completed journeys: measure outcome.",
+              "style": "solid"
+            },
+            {
+              "from": "budget",
+              "to": "channel",
+              "label": "Constrains approach",
+              "detail": "Operating costs connects to Online and in-store: constrains approach.",
+              "style": "solid"
+            }
+          ]
+        },
+        {
+          "id": "buying",
+          "title": "Buying",
+          "description": "The customer and payment path.",
+          "color": "yellow",
+          "nodes": [
+            {
+              "nodeId": "customer",
+              "summary": "Dog owners needing fit.",
+              "detail": "A provisional audience description; validate against actual store visitors."
+            },
+            {
+              "nodeId": "product",
+              "summary": "A manageable range.",
+              "detail": "Choose the real product range and variants with staff."
+            },
+            {
+              "nodeId": "payment",
+              "summary": "Use managed payment.",
+              "detail": "Payment outcome comes from the platform, not a browser success screen."
+            },
+            {
+              "nodeId": "order",
+              "summary": "A fulfilment commitment.",
+              "detail": "Staff see the recorded order and agreed fulfilment method."
+            },
+            {
+              "nodeId": "channel",
+              "summary": "Two connected routes.",
+              "detail": "Plan how someone discovers, buys and gets help across channels."
+            }
+          ],
+          "edges": [
+            {
+              "from": "customer",
+              "to": "product",
+              "label": "Chooses",
+              "detail": "Customer segment connects to Launch catalogue: chooses.",
+              "style": "solid"
+            },
+            {
+              "from": "product",
+              "to": "payment",
+              "label": "Buys",
+              "detail": "Launch catalogue connects to Platform checkout: buys.",
+              "style": "solid"
+            },
+            {
+              "from": "payment",
+              "to": "order",
+              "label": "Records outcome",
+              "detail": "Platform checkout connects to Paid order: records outcome.",
+              "style": "solid"
+            },
+            {
+              "from": "channel",
+              "to": "customer",
+              "label": "Reaches",
+              "detail": "Online and in-store connects to Customer segment: reaches.",
+              "style": "solid"
+            }
+          ]
+        },
+        {
+          "id": "operations",
+          "title": "Operations",
+          "description": "The staff and stock responsibilities.",
+          "color": "orange",
+          "nodes": [
+            {
+              "nodeId": "order",
+              "summary": "A fulfilment commitment.",
+              "detail": "Staff see the recorded order and agreed fulfilment method."
+            },
+            {
+              "nodeId": "inventory",
+              "summary": "One agreed source.",
+              "detail": "Define which system owns stock and when reservations and returns update it."
+            },
+            {
+              "nodeId": "team",
+              "summary": "Pack and support.",
+              "detail": "Assign order handling, content upkeep and escalation responsibility."
+            },
+            {
+              "nodeId": "supplier",
+              "summary": "Reliable product inputs.",
+              "detail": "Confirm lead times and product information instead of guessing availability."
+            },
+            {
+              "nodeId": "metric",
+              "summary": "Measure useful outcomes.",
+              "detail": "Track successful orders and useful store enquiries with an agreed measurement approach."
+            },
+            {
+              "nodeId": "budget",
+              "summary": "Confirm recurring spend.",
+              "detail": "Compare platform, app, payment and support costs after the actual setup is known."
+            }
+          ],
+          "edges": [
+            {
+              "from": "order",
+              "to": "team",
+              "label": "Fulfil",
+              "detail": "Paid order connects to Shop team: fulfil.",
+              "style": "solid"
+            },
+            {
+              "from": "inventory",
+              "to": "order",
+              "label": "Reserve stock",
+              "detail": "Stock owner connects to Paid order: reserve stock.",
+              "style": "solid"
+            },
+            {
+              "from": "supplier",
+              "to": "inventory",
+              "label": "Replenish",
+              "detail": "Product supplier connects to Stock owner: replenish.",
+              "style": "solid"
+            },
+            {
+              "from": "order",
+              "to": "metric",
+              "label": "Measure outcome",
+              "detail": "Paid order connects to Completed journeys: measure outcome.",
+              "style": "solid"
+            }
+          ]
+        }
+      ],
+      "groups": []
+    }
+  ]
+}

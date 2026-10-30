@@ -1,0 +1,2512 @@
+{
+  "schemaVersion": 2,
+  "title": "Cutroom — an AI-assisted video editor",
+  "kind": "webapp",
+  "brief": "Upload footage, edit through a transcript, review AI suggestions and export an approved cut. A greenfield planning example with proposed pilot limits.",
+  "objective": "An editor can turn an interview into a captioned clip without losing the original, and recover if upload, AI or rendering fails.",
+  "success": [
+    "A user can upload, make a manual cut, accept or reject an AI suggestion, undo it, and export the selected revision.",
+    "A failed or repeated request cannot expose another workspace’s assets, duplicate an accepted edit or consume the same job budget twice.",
+    "Exported audio, video and captions agree with the reviewed timeline on the agreed reference-media fixtures."
+  ],
+  "scope": {
+    "now": [
+      "Team workspaces, owner/editor/viewer roles, project library, resumable uploads and proxy previews.",
+      "Transcript corrections, single source-video track, cut/reorder, captions and simple audio gain.",
+      "AI transcript suggestions and reproducible server exports with progress, cancel and retry."
+    ],
+    "later": [
+      "Multitrack editing, live collaboration, shared review links and automated billing.",
+      "More codecs, larger uploads, batch processing and additional language coverage after measurement."
+    ],
+    "out": [
+      "AI-generated footage, voice cloning, autonomous publishing or a full desktop NLE replacement."
+    ]
+  },
+  "context": [],
+  "technologies": [
+    {
+      "id": "web",
+      "name": "Next.js + React + TypeScript",
+      "role": "Project library, editor and application endpoints.",
+      "status": "proposed",
+      "rationale": "One application owns the user-facing workflow and server validation.",
+      "tradeoffs": "Media playback and timeline rendering need dedicated browser performance work.",
+      "alternatives": [],
+      "dependsOn": [],
+      "impacts": [
+        "Project library, editor and application endpoints."
+      ],
+      "checks": [
+        "Server handlers validate access; editing remains usable at the agreed timeline size."
+      ],
+      "source": "https://nextjs.org/docs/app/guides/authentication",
+      "versionPlan": "Pin compatible maintained versions after checking the implementation repository and deployment target; no version has been selected in this plan.",
+      "fit": "complement",
+      "fitDetail": "Works with the other components; it serves a distinct responsibility.",
+      "choiceGroup": ""
+    },
+    {
+      "id": "identity",
+      "name": "Established authentication integration",
+      "role": "Identify people and manage secure sessions.",
+      "status": "proposed",
+      "rationale": "Use a maintained integration; workspace roles remain application rules.",
+      "tradeoffs": "Provider, region, recovery and account lifecycle remain a decision.",
+      "alternatives": [],
+      "dependsOn": [
+        "web"
+      ],
+      "impacts": [
+        "Identify people and manage secure sessions."
+      ],
+      "checks": [
+        "Expired sessions and cross-workspace access fail closed."
+      ],
+      "source": "https://nextjs.org/docs/app/guides/authentication",
+      "versionPlan": "Pin compatible maintained versions after checking the implementation repository and deployment target; no version has been selected in this plan.",
+      "fit": "choice",
+      "fitDetail": "Choose one authentication integration after reviewing existing accounts and deployment; do not implement password/session cryptography here.",
+      "choiceGroup": "identity-provider"
+    },
+    {
+      "id": "postgres",
+      "name": "PostgreSQL",
+      "role": "Store workspaces, assets, edit revisions and job records.",
+      "status": "proposed",
+      "rationale": "Keep the authoritative project state and job coordination in one database.",
+      "tradeoffs": "Large media stays in object storage, and backups need restore drills.",
+      "alternatives": [],
+      "dependsOn": [
+        "web"
+      ],
+      "impacts": [
+        "Store workspaces, assets, edit revisions and job records."
+      ],
+      "checks": [
+        "A revision save is atomic; stale revision writes return a conflict; restore metadata into an isolated environment."
+      ],
+      "source": "Proposed data ownership decision; validate against implementation constraints.",
+      "versionPlan": "Pin compatible maintained versions after checking the implementation repository and deployment target; no version has been selected in this plan.",
+      "fit": "complement",
+      "fitDetail": "Works with the other components; it serves a distinct responsibility.",
+      "choiceGroup": ""
+    },
+    {
+      "id": "objects",
+      "name": "Private S3 object storage",
+      "role": "Keep originals, proxies and finished exports.",
+      "status": "proposed",
+      "rationale": "Multipart transfers can retry failed parts without resending successful parts.",
+      "tradeoffs": "Abandoned uploads, output retention, egress and region need explicit budgets.",
+      "alternatives": [],
+      "dependsOn": [
+        "identity",
+        "postgres"
+      ],
+      "impacts": [
+        "Keep originals, proxies and finished exports."
+      ],
+      "checks": [
+        "Wrong-workspace signing fails; expired links fail; interrupted multipart transfer resumes."
+      ],
+      "source": "https://docs.aws.amazon.com/AmazonS3/latest/userguide/mpuoverview.html",
+      "versionPlan": "Pin compatible maintained versions after checking the implementation repository and deployment target; no version has been selected in this plan.",
+      "fit": "complement",
+      "fitDetail": "Works with the other components; it serves a distinct responsibility.",
+      "choiceGroup": ""
+    },
+    {
+      "id": "jobs",
+      "name": "pg-boss + Node worker",
+      "role": "Run ingest, transcript and render jobs outside HTTP requests.",
+      "status": "proposed",
+      "rationale": "Use a Postgres-backed queue initially to avoid operating an additional broker.",
+      "tradeoffs": "Workers still need retry-safe side effects, resource limits and queue-lag monitoring.",
+      "alternatives": [],
+      "dependsOn": [
+        "postgres",
+        "objects"
+      ],
+      "impacts": [
+        "Run ingest, transcript and render jobs outside HTTP requests."
+      ],
+      "checks": [
+        "Kill a worker mid-job and recover without publishing two outputs; pending work remains observable."
+      ],
+      "source": "https://github.com/timgit/pg-boss",
+      "versionPlan": "Pin compatible maintained versions after checking the implementation repository and deployment target; no version has been selected in this plan.",
+      "fit": "complement",
+      "fitDetail": "Works with the other components; it serves a distinct responsibility.",
+      "choiceGroup": ""
+    },
+    {
+      "id": "render",
+      "name": "FFmpeg / ffprobe in isolated workers",
+      "role": "Inspect files, build proxies and render approved edits.",
+      "status": "proposed",
+      "rationale": "Apply deterministic media operations to a versioned edit description.",
+      "tradeoffs": "Browser previews and server output must share time mapping; codec/license requirements need review.",
+      "alternatives": [],
+      "dependsOn": [
+        "jobs"
+      ],
+      "impacts": [
+        "Inspect files, build proxies and render approved edits."
+      ],
+      "checks": [
+        "Fixture cuts preserve audio/video alignment; limits stop malformed or oversized media; arguments never come from raw shell strings."
+      ],
+      "source": "https://ffmpeg.org/ffmpeg-filters.html",
+      "versionPlan": "Pin compatible maintained versions after checking the implementation repository and deployment target; no version has been selected in this plan.",
+      "fit": "complement",
+      "fitDetail": "Works with the other components; it serves a distinct responsibility.",
+      "choiceGroup": ""
+    },
+    {
+      "id": "ai",
+      "name": "Transcription + structured suggestion adapter",
+      "role": "Turn speech into timed text and propose reviewable edits.",
+      "status": "proposed",
+      "rationale": "The app validates suggestions against real transcript spans before showing them.",
+      "tradeoffs": "Provider, data retention, supported languages, timing quality and cost remain benchmark decisions.",
+      "alternatives": [],
+      "dependsOn": [
+        "jobs",
+        "postgres"
+      ],
+      "impacts": [
+        "Turn speech into timed text and propose reviewable edits."
+      ],
+      "checks": [
+        "Reject invalid timestamps and stale revision proposals; no action is applied without confirmation."
+      ],
+      "source": "Product architecture proposal; provider/model selection intentionally unresolved.",
+      "versionPlan": "Pin compatible maintained versions after checking the implementation repository and deployment target; no version has been selected in this plan.",
+      "fit": "complement",
+      "fitDetail": "Works with the other components; it serves a distinct responsibility.",
+      "choiceGroup": ""
+    }
+  ],
+  "steps": [
+    {
+      "id": "contracts",
+      "title": "Freeze the first editing slice",
+      "summary": "Agree media limits, roles, edit format and fixture clips.",
+      "why": "Agree media limits, roles, edit format and fixture clips.",
+      "deliverable": "Versioned edit schema, endpoint contracts and representative reference-media set.",
+      "acceptance": [
+        "Fixtures include variable frame rate, silence, rotated video and multiple audio layouts.",
+        "Agree proposed 2 GB / 30 minute inputs, 1080p output and concurrency limits before implementation."
+      ],
+      "dependsOn": [],
+      "status": "planned"
+    },
+    {
+      "id": "workspace",
+      "title": "Protect projects and uploads",
+      "summary": "Implement membership checks, library, private signing and interrupted-upload recovery.",
+      "why": "Implement membership checks, library, private signing and interrupted-upload recovery.",
+      "deliverable": "An authorized editor uploads media and sees processing state.",
+      "acceptance": [
+        "Another workspace cannot read, sign, edit or delete the asset.",
+        "Upload interruption and duplicate completion preserve one asset."
+      ],
+      "dependsOn": [
+        "contracts"
+      ],
+      "status": "planned"
+    },
+    {
+      "id": "manual",
+      "title": "Ship manual edit → export",
+      "summary": "Add proxies, cuts, reorder, undo and immutable export snapshots.",
+      "why": "Add proxies, cuts, reorder, undo and immutable export snapshots.",
+      "deliverable": "A usable editor without AI, exporting the exact reviewed revision.",
+      "acceptance": [
+        "Audio/video/captions use a single time mapping.",
+        "Old revision saves conflict cleanly; refresh restores saved work."
+      ],
+      "dependsOn": [
+        "workspace"
+      ],
+      "status": "planned"
+    },
+    {
+      "id": "transcript",
+      "title": "Make the transcript editable",
+      "summary": "Connect speech processing and correct timed segments.",
+      "why": "Connect speech processing and correct timed segments.",
+      "deliverable": "Searchable transcript linked to media; corrections tracked independently of source audio.",
+      "acceptance": [
+        "Provider failure allows retry and leaves manual editing usable.",
+        "Word/segment timing quality meets the agreed benchmark."
+      ],
+      "dependsOn": [
+        "manual"
+      ],
+      "status": "planned"
+    },
+    {
+      "id": "suggestions",
+      "title": "Add reviewable AI changes",
+      "summary": "Suggest removals or highlights, preview differences, apply selected changes.",
+      "why": "Suggest removals or highlights, preview differences, apply selected changes.",
+      "deliverable": "Validated proposals tied to a transcript and edit revision.",
+      "acceptance": [
+        "Malformed or stale suggestions cannot apply.",
+        "Reject and undo recover the original edit revision; no automatic publish."
+      ],
+      "dependsOn": [
+        "transcript"
+      ],
+      "status": "planned"
+    },
+    {
+      "id": "recovery",
+      "title": "Harden jobs and usage budgets",
+      "summary": "Add cancel, retries, retention, fair scheduling and deletion workflows.",
+      "why": "Add cancel, retries, retention, fair scheduling and deletion workflows.",
+      "deliverable": "A bounded queue with observable lifecycle and resource cleanup.",
+      "acceptance": [
+        "Crash after output upload recovers one accepted output.",
+        "Cancelled/deleted projects cannot receive late worker writes.",
+        "Repeated requests do not duplicate usage reservations."
+      ],
+      "dependsOn": [
+        "manual"
+      ],
+      "status": "planned"
+    },
+    {
+      "id": "pilot",
+      "title": "Run the production-shaped pilot",
+      "summary": "Test approved fixture media and representative users with alarms and restore drills.",
+      "why": "Test approved fixture media and representative users with alarms and restore drills.",
+      "deliverable": "Measured pilot report, operating limits, support runbook and rollback decision.",
+      "acceptance": [
+        "Access matrix, render parity, backup restore and failure injection pass.",
+        "Measure actual throughput and cost before accepting launch capacity."
+      ],
+      "dependsOn": [
+        "suggestions",
+        "recovery"
+      ],
+      "status": "planned"
+    }
+  ],
+  "questions": [
+    {
+      "id": "limits",
+      "question": "What is the first customer’s typical footage?",
+      "why": "Input size, codec, language and duration determine processing cost and preview design.",
+      "recommendation": "Use interview/social clips for the first pilot; confirm proposed 2 GB / 30 minute limits.",
+      "options": [
+        {
+          "label": "Interview / podcast clips",
+          "benefit": "A focused transcript-first editor.",
+          "tradeoff": "Less useful for complex visual montages."
+        },
+        {
+          "label": "General marketing footage",
+          "benefit": "Broader range of users.",
+          "tradeoff": "Needs a wider fixture set and more visual editing scope."
+        }
+      ]
+    },
+    {
+      "id": "provider",
+      "question": "Where may customer media be processed?",
+      "why": "Transcription sends customer audio to a model service unless a local model is selected.",
+      "recommendation": "Decide region and retention requirements before benchmarking providers.",
+      "options": [
+        {
+          "label": "Approved hosted provider",
+          "benefit": "Lower operational burden.",
+          "tradeoff": "Review processor terms, region, retention and measured cost."
+        },
+        {
+          "label": "Self-hosted speech model",
+          "benefit": "More direct control over processing.",
+          "tradeoff": "GPU capacity, updates and quality become team responsibilities."
+        }
+      ]
+    },
+    {
+      "id": "identity-choice",
+      "question": "Which identity setup fits the team?",
+      "why": "No existing account provider was supplied for this example.",
+      "recommendation": "Reuse an existing organization identity setup if available.",
+      "options": [
+        {
+          "label": "Managed identity service",
+          "benefit": "Reduces account lifecycle operations.",
+          "tradeoff": "Vendor costs and data location must fit."
+        },
+        {
+          "label": "Maintained self-hosted integration",
+          "benefit": "Control deployment and account storage.",
+          "tradeoff": "The team owns recovery, mail and operations."
+        }
+      ]
+    }
+  ],
+  "diagrams": [
+    {
+      "id": "editing-journey",
+      "title": "From raw footage to an approved export",
+      "description": "The main route stays usable without AI. Yellow branches are choices; dashed arrows are recovery or optional paths.",
+      "nodes": [
+        {
+          "id": "library",
+          "label": "Project library",
+          "type": "page",
+          "column": 0,
+          "row": 0
+        },
+        {
+          "id": "upload",
+          "label": "Resumable upload",
+          "type": "storage",
+          "column": 1,
+          "row": 0
+        },
+        {
+          "id": "prepare",
+          "label": "Prepare media",
+          "type": "worker",
+          "column": 2,
+          "row": 0
+        },
+        {
+          "id": "editor",
+          "label": "Timeline + transcript",
+          "type": "client",
+          "column": 2,
+          "row": 1
+        },
+        {
+          "id": "suggest",
+          "label": "AI suggestions",
+          "type": "ai_model",
+          "column": 1,
+          "row": 1
+        },
+        {
+          "id": "approve",
+          "label": "Review proposed changes",
+          "type": "decision",
+          "column": 0,
+          "row": 1
+        },
+        {
+          "id": "export",
+          "label": "Versioned export",
+          "type": "worker",
+          "column": 0,
+          "row": 2
+        },
+        {
+          "id": "download",
+          "label": "Private download",
+          "type": "page",
+          "column": 1,
+          "row": 2
+        },
+        {
+          "id": "recover",
+          "label": "Retry / cancel / keep editing",
+          "type": "state",
+          "column": 2,
+          "row": 2
+        }
+      ],
+      "layers": [
+        {
+          "id": "manual",
+          "title": "Manual workflow",
+          "description": "A complete useful slice exists before AI is added.",
+          "color": "blue",
+          "nodes": [
+            {
+              "nodeId": "library",
+              "summary": "Choose a project and source footage.",
+              "detail": "Users see only workspaces they belong to. Owners manage membership; editors change projects; viewers cannot write."
+            },
+            {
+              "nodeId": "upload",
+              "summary": "Upload directly to private storage.",
+              "detail": "The API authorizes each upload session and issues narrow, expiring part URLs."
+            },
+            {
+              "nodeId": "prepare",
+              "summary": "Create a proxy and inspect timing.",
+              "detail": "Probe format, dimensions, duration and audio; reject unsupported inputs explicitly."
+            },
+            {
+              "nodeId": "editor",
+              "summary": "Cut, reorder and correct captions.",
+              "detail": "The editable timeline is structured data. Originals never change."
+            },
+            {
+              "nodeId": "export",
+              "summary": "Render a fixed edit revision.",
+              "detail": "The job records the chosen revision, render settings and source asset checksums."
+            },
+            {
+              "nodeId": "download",
+              "summary": "Download when validation completes.",
+              "detail": "Publish the artifact only after metadata and media checks succeed; expire the signed URL."
+            }
+          ],
+          "edges": [
+            {
+              "from": "library",
+              "to": "upload",
+              "label": "Add footage",
+              "detail": "Create an upload session after membership and quota checks.",
+              "style": "solid"
+            },
+            {
+              "from": "upload",
+              "to": "prepare",
+              "label": "Upload complete",
+              "detail": "Validate completed parts and queue processing once.",
+              "style": "solid"
+            },
+            {
+              "from": "prepare",
+              "to": "editor",
+              "label": "Proxy ready",
+              "detail": "Expose preview media only after inspection.",
+              "style": "solid"
+            },
+            {
+              "from": "editor",
+              "to": "export",
+              "label": "Export revision",
+              "detail": "Manual or AI-assisted edits follow the same renderer.",
+              "style": "solid"
+            },
+            {
+              "from": "export",
+              "to": "download",
+              "label": "Ready",
+              "detail": "Publish the verified output for this snapshot.",
+              "style": "solid"
+            }
+          ]
+        },
+        {
+          "id": "ai",
+          "title": "AI review loop",
+          "description": "The model suggests; the editor decides.",
+          "color": "pink",
+          "nodes": [
+            {
+              "nodeId": "editor",
+              "summary": "Cut, reorder and correct captions.",
+              "detail": "The editable timeline is structured data. Originals never change."
+            },
+            {
+              "nodeId": "suggest",
+              "summary": "Propose edits tied to real spans.",
+              "detail": "Suggestions reference asset ID, transcript revision and existing time spans; model prose is never an executable command."
+            },
+            {
+              "nodeId": "approve",
+              "summary": "Accept a selection or reject it.",
+              "detail": "Preview affected clips and captions. Stale proposals require regeneration against the current revision."
+            }
+          ],
+          "edges": [
+            {
+              "from": "editor",
+              "to": "suggest",
+              "label": "Suggest edits",
+              "detail": "Optional request; manual controls remain available.",
+              "style": "dashed"
+            },
+            {
+              "from": "suggest",
+              "to": "approve",
+              "label": "Review proposal",
+              "detail": "Show exact edits and their basis.",
+              "style": "solid"
+            },
+            {
+              "from": "approve",
+              "to": "editor",
+              "label": "Apply or reject",
+              "detail": "Apply as a new revision only after user confirmation.",
+              "style": "solid"
+            }
+          ]
+        },
+        {
+          "id": "recovery",
+          "title": "Failure & recovery",
+          "description": "Keep the project available while a job fails or is cancelled.",
+          "color": "orange",
+          "nodes": [
+            {
+              "nodeId": "prepare",
+              "summary": "Create a proxy and inspect timing.",
+              "detail": "Probe format, dimensions, duration and audio; reject unsupported inputs explicitly."
+            },
+            {
+              "nodeId": "editor",
+              "summary": "Cut, reorder and correct captions.",
+              "detail": "The editable timeline is structured data. Originals never change."
+            },
+            {
+              "nodeId": "export",
+              "summary": "Render a fixed edit revision.",
+              "detail": "The job records the chosen revision, render settings and source asset checksums."
+            },
+            {
+              "nodeId": "recover",
+              "summary": "Failure does not destroy the project.",
+              "detail": "Store a readable error and a retryable job state; cancelling prevents late publication."
+            }
+          ],
+          "edges": [
+            {
+              "from": "prepare",
+              "to": "editor",
+              "label": "Proxy ready",
+              "detail": "Expose preview media only after inspection.",
+              "style": "solid"
+            },
+            {
+              "from": "editor",
+              "to": "export",
+              "label": "Export revision",
+              "detail": "Manual or AI-assisted edits follow the same renderer.",
+              "style": "solid"
+            },
+            {
+              "from": "prepare",
+              "to": "recover",
+              "label": "Preparation fails",
+              "detail": "Explain the unsupported input or retryable processing problem.",
+              "style": "dashed"
+            },
+            {
+              "from": "export",
+              "to": "recover",
+              "label": "Render fails",
+              "detail": "Retain settings and allow a safe retry.",
+              "style": "dashed"
+            },
+            {
+              "from": "recover",
+              "to": "editor",
+              "label": "Return to project",
+              "detail": "Keep the current edit available.",
+              "style": "dashed"
+            }
+          ]
+        }
+      ],
+      "groups": [],
+      "walkthroughs": [
+        {
+          "id": "first-cut",
+          "title": "Make a first cut",
+          "kind": "journey",
+          "intro": "Start with an interview file and use the editor without relying on AI.",
+          "result": "You have an edited video you can download.",
+          "steps": [
+            {
+              "id": "choose",
+              "title": "Choose a project and add footage",
+              "explanation": "Keep related files and edits together in one project.",
+              "nodeIds": [
+                "library",
+                "upload"
+              ],
+              "edges": [
+                {
+                  "layerId": "manual",
+                  "from": "library",
+                  "to": "upload"
+                }
+              ]
+            },
+            {
+              "id": "prepare",
+              "title": "Wait for an editable preview",
+              "explanation": "The upload is checked and a smaller preview is prepared. You can begin once it is ready.",
+              "nodeIds": [
+                "upload",
+                "prepare",
+                "editor"
+              ],
+              "edges": [
+                {
+                  "layerId": "manual",
+                  "from": "upload",
+                  "to": "prepare"
+                },
+                {
+                  "layerId": "manual",
+                  "from": "prepare",
+                  "to": "editor"
+                }
+              ]
+            },
+            {
+              "id": "edit",
+              "title": "Make the cuts yourself",
+              "explanation": "Use the timeline and transcript to choose what stays. Your choices are saved separately from the original footage.",
+              "nodeIds": [
+                "editor"
+              ],
+              "edges": []
+            },
+            {
+              "id": "export",
+              "title": "Export the chosen edit",
+              "explanation": "Rendering turns your saved editing instructions into a new video file.",
+              "nodeIds": [
+                "editor",
+                "export"
+              ],
+              "edges": [
+                {
+                  "layerId": "manual",
+                  "from": "editor",
+                  "to": "export"
+                }
+              ]
+            },
+            {
+              "id": "download",
+              "title": "Download the checked result",
+              "explanation": "The download appears when processing and output checks succeed.",
+              "nodeIds": [
+                "export",
+                "download"
+              ],
+              "edges": [
+                {
+                  "layerId": "manual",
+                  "from": "export",
+                  "to": "download"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "ai-review",
+          "title": "Review an AI suggestion",
+          "kind": "journey",
+          "intro": "Ask for help with an edit while keeping the final decision yourself.",
+          "result": "Accepted edits create a new version; rejected suggestions leave your work alone.",
+          "steps": [
+            {
+              "id": "ask",
+              "title": "Ask for a suggestion",
+              "explanation": "Choose the kind of help you want, such as finding a highlight.",
+              "nodeIds": [
+                "editor",
+                "suggest"
+              ],
+              "edges": [
+                {
+                  "layerId": "ai",
+                  "from": "editor",
+                  "to": "suggest"
+                }
+              ]
+            },
+            {
+              "id": "inspect",
+              "title": "Read the proposed changes",
+              "explanation": "The proposal shows actual parts of your footage, not an unexplained command.",
+              "nodeIds": [
+                "suggest",
+                "approve"
+              ],
+              "edges": [
+                {
+                  "layerId": "ai",
+                  "from": "suggest",
+                  "to": "approve"
+                }
+              ]
+            },
+            {
+              "id": "decide",
+              "title": "Accept or reject it",
+              "explanation": "Apply only the changes you agree with. Keep editing manually if the suggestion is unhelpful.",
+              "nodeIds": [
+                "approve",
+                "editor"
+              ],
+              "edges": [
+                {
+                  "layerId": "ai",
+                  "from": "approve",
+                  "to": "editor"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "recover",
+          "title": "When processing fails",
+          "kind": "journey",
+          "intro": "A failed upload preparation or export should not destroy the project.",
+          "result": "You can retry safely or return to the saved edit.",
+          "steps": [
+            {
+              "id": "fail",
+              "title": "The app identifies the failed job",
+              "explanation": "Preparation and export are separate jobs. The error should say which one failed and whether retry is possible.",
+              "nodeIds": [
+                "prepare",
+                "export",
+                "recover"
+              ],
+              "edges": [
+                {
+                  "layerId": "recovery",
+                  "from": "prepare",
+                  "to": "recover"
+                },
+                {
+                  "layerId": "recovery",
+                  "from": "export",
+                  "to": "recover"
+                }
+              ]
+            },
+            {
+              "id": "keep",
+              "title": "Your edit stays available",
+              "explanation": "A failure does not erase the source video or the saved editing choices.",
+              "nodeIds": [
+                "recover",
+                "editor"
+              ],
+              "edges": [
+                {
+                  "layerId": "recovery",
+                  "from": "recover",
+                  "to": "editor"
+                }
+              ]
+            },
+            {
+              "id": "retry",
+              "title": "Choose a retry or continue editing",
+              "explanation": "Use the error and saved settings to decide the next action. A retry must not create duplicate accepted results.",
+              "nodeIds": [
+                "recover"
+              ],
+              "edges": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "runtime",
+      "title": "Where data and processing live",
+      "description": "The application handles short requests. Media workers handle long, bounded tasks. Credentials and private media stay behind access checks.",
+      "nodes": [
+        {
+          "id": "browser",
+          "label": "Browser editor",
+          "type": "client",
+          "column": 0,
+          "row": 0
+        },
+        {
+          "id": "api",
+          "label": "Application API",
+          "type": "api",
+          "column": 1,
+          "row": 0
+        },
+        {
+          "id": "auth",
+          "label": "Identity + membership",
+          "type": "auth",
+          "column": 2,
+          "row": 0
+        },
+        {
+          "id": "db",
+          "label": "Postgres metadata",
+          "type": "database",
+          "column": 1,
+          "row": 1
+        },
+        {
+          "id": "storage",
+          "label": "Private media bucket",
+          "type": "storage",
+          "column": 0,
+          "row": 1
+        },
+        {
+          "id": "queue",
+          "label": "Durable jobs",
+          "type": "queue",
+          "column": 2,
+          "row": 1
+        },
+        {
+          "id": "worker",
+          "label": "Media worker",
+          "type": "worker",
+          "column": 2,
+          "row": 2
+        },
+        {
+          "id": "models",
+          "label": "Speech / suggestion provider",
+          "type": "ai_model",
+          "column": 0,
+          "row": 2
+        },
+        {
+          "id": "events",
+          "label": "Job status + usage",
+          "type": "monitor",
+          "column": 1,
+          "row": 2
+        }
+      ],
+      "layers": [
+        {
+          "id": "access",
+          "title": "Access & private data",
+          "description": "Every access path includes authorization; a hidden button is not an access control.",
+          "color": "pink",
+          "nodes": [
+            {
+              "nodeId": "browser",
+              "summary": "Timeline, transcript and playback.",
+              "detail": "Caches a working edit locally while the server owns saved revisions."
+            },
+            {
+              "nodeId": "api",
+              "summary": "Validate access and commands.",
+              "detail": "Next.js handlers call shared validation and workspace authorization before reading or mutating state."
+            },
+            {
+              "nodeId": "auth",
+              "summary": "Identity is not permission.",
+              "detail": "Check current workspace membership and role on every mutation, signing operation and job result."
+            },
+            {
+              "nodeId": "db",
+              "summary": "Authoritative project revisions.",
+              "detail": "Projects, assets, memberships, revisions, usage reservations and jobs are scoped by workspace."
+            },
+            {
+              "nodeId": "storage",
+              "summary": "Originals, proxies, exports.",
+              "detail": "Object keys alone grant no access; downloads and part uploads use expiring scoped URLs."
+            }
+          ],
+          "edges": [
+            {
+              "from": "browser",
+              "to": "api",
+              "label": "Command / save",
+              "detail": "Validate input and expected revision.",
+              "style": "solid"
+            },
+            {
+              "from": "api",
+              "to": "auth",
+              "label": "Check membership",
+              "detail": "Fail closed for missing, expired or insufficient membership.",
+              "style": "solid"
+            },
+            {
+              "from": "api",
+              "to": "db",
+              "label": "Read / commit",
+              "detail": "Use one authorized data boundary.",
+              "style": "solid"
+            },
+            {
+              "from": "browser",
+              "to": "storage",
+              "label": "Signed parts",
+              "detail": "API-issued short-lived upload URLs.",
+              "style": "solid"
+            },
+            {
+              "from": "api",
+              "to": "browser",
+              "label": "Upload permission",
+              "detail": "After checking membership, return short-lived permission for this file upload.",
+              "style": "solid"
+            }
+          ]
+        },
+        {
+          "id": "processing",
+          "title": "Background processing",
+          "description": "Long work is separate from the HTTP response; failure remains recoverable.",
+          "color": "yellow",
+          "nodes": [
+            {
+              "nodeId": "browser",
+              "summary": "Timeline, transcript and playback.",
+              "detail": "Caches a working edit locally while the server owns saved revisions."
+            },
+            {
+              "nodeId": "api",
+              "summary": "Validate access and commands.",
+              "detail": "Next.js handlers call shared validation and workspace authorization before reading or mutating state."
+            },
+            {
+              "nodeId": "db",
+              "summary": "Authoritative project revisions.",
+              "detail": "Projects, assets, memberships, revisions, usage reservations and jobs are scoped by workspace."
+            },
+            {
+              "nodeId": "storage",
+              "summary": "Originals, proxies, exports.",
+              "detail": "Object keys alone grant no access; downloads and part uploads use expiring scoped URLs."
+            },
+            {
+              "nodeId": "queue",
+              "summary": "Pending, leased and retryable work.",
+              "detail": "Postgres-backed queue; leases, attempts and idempotency keys protect repeated deliveries."
+            },
+            {
+              "nodeId": "worker",
+              "summary": "Probe, transcode and render.",
+              "detail": "Run constrained processes with explicit file inputs, memory/time limits and no arbitrary shell evaluation."
+            },
+            {
+              "nodeId": "models",
+              "summary": "External processing adapter.",
+              "detail": "Only approved media is sent; provider output is untrusted data and validated."
+            },
+            {
+              "nodeId": "events",
+              "summary": "Show progress and cost state.",
+              "detail": "Events are scoped to the project; polling reconnects using persisted status."
+            }
+          ],
+          "edges": [
+            {
+              "from": "browser",
+              "to": "api",
+              "label": "Command / save",
+              "detail": "Validate input and expected revision.",
+              "style": "solid"
+            },
+            {
+              "from": "api",
+              "to": "db",
+              "label": "Read / commit",
+              "detail": "Use one authorized data boundary.",
+              "style": "solid"
+            },
+            {
+              "from": "browser",
+              "to": "storage",
+              "label": "Signed parts",
+              "detail": "API-issued short-lived upload URLs.",
+              "style": "solid"
+            },
+            {
+              "from": "api",
+              "to": "queue",
+              "label": "Submit job",
+              "detail": "Use stable idempotency keys and an atomic job/usage reservation.",
+              "style": "solid"
+            },
+            {
+              "from": "queue",
+              "to": "worker",
+              "label": "Lease work",
+              "detail": "Recover expired leases without assuming side effects happen only once.",
+              "style": "solid"
+            },
+            {
+              "from": "worker",
+              "to": "storage",
+              "label": "Read / write assets",
+              "detail": "Revalidate job ownership and cancellation before publication.",
+              "style": "solid"
+            },
+            {
+              "from": "worker",
+              "to": "models",
+              "label": "Approved audio / spans",
+              "detail": "Only when processing permission and budget checks pass.",
+              "style": "solid"
+            },
+            {
+              "from": "worker",
+              "to": "db",
+              "label": "Commit result",
+              "detail": "Commit completion for the expected job and revision.",
+              "style": "solid"
+            },
+            {
+              "from": "db",
+              "to": "events",
+              "label": "Persisted state",
+              "detail": "Status comes from authoritative job records.",
+              "style": "solid"
+            },
+            {
+              "from": "events",
+              "to": "browser",
+              "label": "Progress / reconnect",
+              "detail": "Never stream another workspace’s job.",
+              "style": "solid"
+            },
+            {
+              "from": "models",
+              "to": "worker",
+              "label": "Text / proposed edits",
+              "detail": "Return timed text or structured suggestions for validation before a person reviews them.",
+              "style": "solid"
+            }
+          ]
+        }
+      ],
+      "groups": [
+        {
+          "id": "user",
+          "title": "User device",
+          "color": "blue",
+          "nodeIds": [
+            "browser"
+          ]
+        },
+        {
+          "id": "app",
+          "title": "Application trust boundary",
+          "color": "green",
+          "nodeIds": [
+            "api",
+            "auth",
+            "db",
+            "queue",
+            "worker",
+            "events"
+          ]
+        },
+        {
+          "id": "external",
+          "title": "Storage and model services",
+          "color": "yellow",
+          "nodeIds": [
+            "storage",
+            "models"
+          ]
+        }
+      ],
+      "walkthroughs": [
+        {
+          "id": "upload",
+          "title": "Upload and prepare a video",
+          "kind": "journey",
+          "intro": "Imagine you have an interview on your computer and want to start editing it.",
+          "result": "You get a private, playable preview. The original video remains unchanged.",
+          "steps": [
+            {
+              "id": "request",
+              "title": "You choose a video",
+              "explanation": "The browser is the website you use. It asks the application to start an upload.",
+              "nodeIds": [
+                "browser",
+                "api"
+              ],
+              "edges": [
+                {
+                  "layerId": "access",
+                  "from": "browser",
+                  "to": "api"
+                }
+              ]
+            },
+            {
+              "id": "permission",
+              "title": "The application checks your access",
+              "explanation": "It checks both who you are and whether this project belongs to a team you can edit. Signing in alone is not enough.",
+              "nodeIds": [
+                "api",
+                "auth"
+              ],
+              "edges": [
+                {
+                  "layerId": "access",
+                  "from": "api",
+                  "to": "auth"
+                }
+              ]
+            },
+            {
+              "id": "store",
+              "title": "Your file goes into private storage",
+              "explanation": "The application gives your browser temporary upload permission. The video goes into the private media bucket: storage for files.",
+              "nodeIds": [
+                "api",
+                "browser",
+                "storage"
+              ],
+              "edges": [
+                {
+                  "layerId": "access",
+                  "from": "api",
+                  "to": "browser"
+                },
+                {
+                  "layerId": "access",
+                  "from": "browser",
+                  "to": "storage"
+                }
+              ]
+            },
+            {
+              "id": "queue",
+              "title": "Preparation joins a waiting list",
+              "explanation": "The application adds a saved job to the queue. This lets the website respond while longer work waits its turn.",
+              "nodeIds": [
+                "api",
+                "queue"
+              ],
+              "edges": [
+                {
+                  "layerId": "processing",
+                  "from": "api",
+                  "to": "queue"
+                }
+              ]
+            },
+            {
+              "id": "prepare",
+              "title": "A worker prepares a preview",
+              "explanation": "A worker is a background program. It takes the job, reads the video and saves a smaller version that is easier to play while editing.",
+              "nodeIds": [
+                "queue",
+                "worker",
+                "storage"
+              ],
+              "edges": [
+                {
+                  "layerId": "processing",
+                  "from": "queue",
+                  "to": "worker"
+                },
+                {
+                  "layerId": "processing",
+                  "from": "worker",
+                  "to": "storage"
+                }
+              ]
+            },
+            {
+              "id": "ready",
+              "title": "You see progress, then the preview",
+              "explanation": "The worker updates the database, which stores project records rather than the video itself. The website reads that saved status and shows the result.",
+              "nodeIds": [
+                "worker",
+                "db",
+                "events",
+                "browser"
+              ],
+              "edges": [
+                {
+                  "layerId": "processing",
+                  "from": "worker",
+                  "to": "db"
+                },
+                {
+                  "layerId": "processing",
+                  "from": "db",
+                  "to": "events"
+                },
+                {
+                  "layerId": "processing",
+                  "from": "events",
+                  "to": "browser"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "suggest",
+          "title": "Get and review AI suggestions",
+          "kind": "journey",
+          "intro": "You already have a project and want help finding useful cuts or removing pauses.",
+          "result": "You receive proposed edits. Nothing changes until you accept a proposal.",
+          "steps": [
+            {
+              "id": "ask",
+              "title": "You ask for editing help",
+              "explanation": "The website sends your request and the version of the edit you are looking at.",
+              "nodeIds": [
+                "browser",
+                "api"
+              ],
+              "edges": [
+                {
+                  "layerId": "access",
+                  "from": "browser",
+                  "to": "api"
+                }
+              ]
+            },
+            {
+              "id": "check",
+              "title": "The application checks access and budget",
+              "explanation": "The server checks project membership and processing limits before it queues the request.",
+              "nodeIds": [
+                "api",
+                "auth",
+                "queue"
+              ],
+              "edges": [
+                {
+                  "layerId": "access",
+                  "from": "api",
+                  "to": "auth"
+                },
+                {
+                  "layerId": "processing",
+                  "from": "api",
+                  "to": "queue"
+                }
+              ]
+            },
+            {
+              "id": "process",
+              "title": "A worker asks the approved AI service",
+              "explanation": "The worker collects the approved audio or transcript spans. Only the selected material is sent for processing.",
+              "nodeIds": [
+                "queue",
+                "worker",
+                "storage",
+                "models"
+              ],
+              "edges": [
+                {
+                  "layerId": "processing",
+                  "from": "queue",
+                  "to": "worker"
+                },
+                {
+                  "layerId": "processing",
+                  "from": "worker",
+                  "to": "storage"
+                },
+                {
+                  "layerId": "processing",
+                  "from": "worker",
+                  "to": "models"
+                }
+              ]
+            },
+            {
+              "id": "validate",
+              "title": "The worker checks the returned suggestion",
+              "explanation": "AI output is treated as a proposal. Times must fit the real source video, and the proposal must refer to the current edit version.",
+              "nodeIds": [
+                "models",
+                "worker",
+                "db"
+              ],
+              "edges": [
+                {
+                  "layerId": "processing",
+                  "from": "models",
+                  "to": "worker"
+                },
+                {
+                  "layerId": "processing",
+                  "from": "worker",
+                  "to": "db"
+                }
+              ]
+            },
+            {
+              "id": "review",
+              "title": "You inspect the proposed changes",
+              "explanation": "The website shows what would change. You can accept, reject or continue editing manually.",
+              "nodeIds": [
+                "db",
+                "events",
+                "browser"
+              ],
+              "edges": [
+                {
+                  "layerId": "processing",
+                  "from": "db",
+                  "to": "events"
+                },
+                {
+                  "layerId": "processing",
+                  "from": "events",
+                  "to": "browser"
+                }
+              ]
+            },
+            {
+              "id": "apply",
+              "title": "Accepted changes become a new saved edit",
+              "explanation": "If you accept, the application saves a new edit version. It rejects an outdated proposal instead of overwriting newer work.",
+              "nodeIds": [
+                "browser",
+                "api",
+                "db"
+              ],
+              "edges": [
+                {
+                  "layerId": "access",
+                  "from": "browser",
+                  "to": "api"
+                },
+                {
+                  "layerId": "access",
+                  "from": "api",
+                  "to": "db"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "export",
+          "title": "Export the finished video",
+          "kind": "journey",
+          "intro": "You have reviewed the timeline and want a downloadable video.",
+          "result": "You get a file made from the exact edit version you selected.",
+          "steps": [
+            {
+              "id": "choose",
+              "title": "You choose an edit version and export settings",
+              "explanation": "The website sends these choices to the application. Later edits will not silently change this export.",
+              "nodeIds": [
+                "browser",
+                "api"
+              ],
+              "edges": [
+                {
+                  "layerId": "access",
+                  "from": "browser",
+                  "to": "api"
+                }
+              ]
+            },
+            {
+              "id": "save",
+              "title": "The application records the export request",
+              "explanation": "It checks your permission and saves the chosen edit version and settings in the database.",
+              "nodeIds": [
+                "api",
+                "auth",
+                "db"
+              ],
+              "edges": [
+                {
+                  "layerId": "access",
+                  "from": "api",
+                  "to": "auth"
+                },
+                {
+                  "layerId": "access",
+                  "from": "api",
+                  "to": "db"
+                }
+              ]
+            },
+            {
+              "id": "wait",
+              "title": "The export waits for a worker",
+              "explanation": "The queue keeps the request while a worker becomes available. You can leave the page and return to its saved status.",
+              "nodeIds": [
+                "api",
+                "queue",
+                "worker"
+              ],
+              "edges": [
+                {
+                  "layerId": "processing",
+                  "from": "api",
+                  "to": "queue"
+                },
+                {
+                  "layerId": "processing",
+                  "from": "queue",
+                  "to": "worker"
+                }
+              ]
+            },
+            {
+              "id": "render",
+              "title": "The worker creates the finished video",
+              "explanation": "It reads the original files, applies the saved cuts and captions, and stores a new output file. It does not overwrite the original.",
+              "nodeIds": [
+                "worker",
+                "storage"
+              ],
+              "edges": [
+                {
+                  "layerId": "processing",
+                  "from": "worker",
+                  "to": "storage"
+                }
+              ]
+            },
+            {
+              "id": "publish",
+              "title": "The worker checks and records the result",
+              "explanation": "A successful output is attached to this job. Failed or cancelled jobs cannot publish a finished download.",
+              "nodeIds": [
+                "worker",
+                "db"
+              ],
+              "edges": [
+                {
+                  "layerId": "processing",
+                  "from": "worker",
+                  "to": "db"
+                }
+              ]
+            },
+            {
+              "id": "download",
+              "title": "The website shows the result",
+              "explanation": "Saved progress tells your browser when the file is ready. Downloads still require access to the project.",
+              "nodeIds": [
+                "db",
+                "events",
+                "browser"
+              ],
+              "edges": [
+                {
+                  "layerId": "processing",
+                  "from": "db",
+                  "to": "events"
+                },
+                {
+                  "layerId": "processing",
+                  "from": "events",
+                  "to": "browser"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "job-life",
+      "title": "A render job can fail without losing the edit",
+      "description": "This is a state diagram for one versioned render. Retrying uses the same logical job; it is not permission to duplicate billable effects.",
+      "nodes": [
+        {
+          "id": "queued",
+          "label": "Queued",
+          "type": "state",
+          "column": 0,
+          "row": 0
+        },
+        {
+          "id": "running",
+          "label": "Running",
+          "type": "state",
+          "column": 1,
+          "row": 0
+        },
+        {
+          "id": "checking",
+          "label": "Checking output",
+          "type": "test",
+          "column": 2,
+          "row": 0
+        },
+        {
+          "id": "ready",
+          "label": "Ready",
+          "type": "state",
+          "column": 2,
+          "row": 1
+        },
+        {
+          "id": "retry",
+          "label": "Retryable failure",
+          "type": "risk",
+          "column": 1,
+          "row": 1
+        },
+        {
+          "id": "cancelled",
+          "label": "Cancelled / deleted",
+          "type": "state",
+          "column": 0,
+          "row": 1
+        }
+      ],
+      "layers": [
+        {
+          "id": "overview",
+          "title": "Whole picture",
+          "description": "This is a state diagram for one versioned render. Retrying uses the same logical job; it is not permission to duplicate billable effects.",
+          "color": "green",
+          "nodes": [
+            {
+              "nodeId": "queued",
+              "summary": "Reservation and snapshot saved.",
+              "detail": "Idempotency key prevents two logical renders for the same submitted request."
+            },
+            {
+              "nodeId": "running",
+              "summary": "A worker holds a lease.",
+              "detail": "Heartbeat, resource limits and cancellation checks bound the work."
+            },
+            {
+              "nodeId": "checking",
+              "summary": "Inspect the artifact.",
+              "detail": "Verify audio/video duration, output profile and existence before ready."
+            },
+            {
+              "nodeId": "ready",
+              "summary": "One artifact is published.",
+              "detail": "Output is linked atomically to the job; signed downloads are issued only to current members."
+            },
+            {
+              "nodeId": "retry",
+              "summary": "Transient failure, bounded retries.",
+              "detail": "Backoff and attempt limits avoid an infinite expensive loop; expose manual retry after exhaustion."
+            },
+            {
+              "nodeId": "cancelled",
+              "summary": "No later publication.",
+              "detail": "A tombstone fences late worker results and triggers orphan cleanup."
+            }
+          ],
+          "edges": [
+            {
+              "from": "queued",
+              "to": "running",
+              "label": "Lease",
+              "detail": "Acquire one attempt.",
+              "style": "solid"
+            },
+            {
+              "from": "running",
+              "to": "checking",
+              "label": "Render finishes",
+              "detail": "Upload to a temporary object key.",
+              "style": "solid"
+            },
+            {
+              "from": "checking",
+              "to": "ready",
+              "label": "Validation passes",
+              "detail": "Publish only if job is still current and not cancelled.",
+              "style": "solid"
+            },
+            {
+              "from": "running",
+              "to": "retry",
+              "label": "Crash / timeout",
+              "detail": "Recover expired lease and retain reason.",
+              "style": "dashed"
+            },
+            {
+              "from": "checking",
+              "to": "retry",
+              "label": "Invalid output",
+              "detail": "Keep diagnosis; do not present a broken download.",
+              "style": "dashed"
+            },
+            {
+              "from": "retry",
+              "to": "queued",
+              "label": "Retry within budget",
+              "detail": "Keep the logical job identity, increment the attempt.",
+              "style": "dashed"
+            },
+            {
+              "from": "queued",
+              "to": "cancelled",
+              "label": "Cancel",
+              "detail": "Release reservation according to measured usage.",
+              "style": "dashed"
+            },
+            {
+              "from": "running",
+              "to": "cancelled",
+              "label": "Cancel or delete",
+              "detail": "Stop work where possible and reject later publication.",
+              "style": "dashed"
+            }
+          ]
+        }
+      ],
+      "groups": [],
+      "walkthroughs": [
+        {
+          "id": "normal",
+          "title": "A successful export",
+          "kind": "journey",
+          "intro": "Follow one export request from waiting to a finished file.",
+          "result": "The app publishes one checked output for this request.",
+          "steps": [
+            {
+              "id": "wait",
+              "title": "The request waits safely",
+              "explanation": "The queue records which edit version to render.",
+              "nodeIds": [
+                "queued"
+              ],
+              "edges": []
+            },
+            {
+              "id": "run",
+              "title": "A worker starts the job",
+              "explanation": "The worker reserves this attempt so another worker does not start the same attempt at the same time.",
+              "nodeIds": [
+                "queued",
+                "running"
+              ],
+              "edges": [
+                {
+                  "layerId": "overview",
+                  "from": "queued",
+                  "to": "running"
+                }
+              ]
+            },
+            {
+              "id": "check",
+              "title": "The output is checked",
+              "explanation": "Finishing the render is not enough: the app checks that the expected video and audio output exists.",
+              "nodeIds": [
+                "running",
+                "checking"
+              ],
+              "edges": [
+                {
+                  "layerId": "overview",
+                  "from": "running",
+                  "to": "checking"
+                }
+              ]
+            },
+            {
+              "id": "ready",
+              "title": "The result becomes available",
+              "explanation": "Only a valid, uncancelled job is marked ready for download.",
+              "nodeIds": [
+                "checking",
+                "ready"
+              ],
+              "edges": [
+                {
+                  "layerId": "overview",
+                  "from": "checking",
+                  "to": "ready"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "retry",
+          "title": "Retry or cancel",
+          "kind": "journey",
+          "intro": "A processing problem needs a clear next action, not an endless spinner.",
+          "result": "The job either retries within its limits or stops without publishing a late result.",
+          "steps": [
+            {
+              "id": "failure",
+              "title": "A failed attempt gets a reason",
+              "explanation": "A crashed worker or invalid output is recorded as a failure.",
+              "nodeIds": [
+                "running",
+                "checking",
+                "retry"
+              ],
+              "edges": [
+                {
+                  "layerId": "overview",
+                  "from": "running",
+                  "to": "retry"
+                },
+                {
+                  "layerId": "overview",
+                  "from": "checking",
+                  "to": "retry"
+                }
+              ]
+            },
+            {
+              "id": "again",
+              "title": "A retry goes back to the queue",
+              "explanation": "The same logical request gets another bounded attempt. It should not charge or publish twice for one accepted result.",
+              "nodeIds": [
+                "retry",
+                "queued"
+              ],
+              "edges": [
+                {
+                  "layerId": "overview",
+                  "from": "retry",
+                  "to": "queued"
+                }
+              ]
+            },
+            {
+              "id": "cancel",
+              "title": "Cancellation stops publication",
+              "explanation": "A waiting or running job can be cancelled. Even if its worker finishes late, that result must not become available.",
+              "nodeIds": [
+                "queued",
+                "running",
+                "cancelled"
+              ],
+              "edges": [
+                {
+                  "layerId": "overview",
+                  "from": "queued",
+                  "to": "cancelled"
+                },
+                {
+                  "layerId": "overview",
+                  "from": "running",
+                  "to": "cancelled"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "build-order",
+      "title": "Build a usable editor before adding AI",
+      "description": "Arrows show prerequisites, not dates. Select a node to inspect its deliverable and release checks.",
+      "nodes": [
+        {
+          "id": "contracts",
+          "label": "Freeze the first editing slice",
+          "type": "task",
+          "column": 0,
+          "row": 0
+        },
+        {
+          "id": "workspace",
+          "label": "Protect projects and uploads",
+          "type": "task",
+          "column": 1,
+          "row": 0
+        },
+        {
+          "id": "manual",
+          "label": "Ship manual edit → export",
+          "type": "task",
+          "column": 2,
+          "row": 0
+        },
+        {
+          "id": "transcript",
+          "label": "Make the transcript editable",
+          "type": "task",
+          "column": 2,
+          "row": 1
+        },
+        {
+          "id": "suggestions",
+          "label": "Add reviewable AI changes",
+          "type": "task",
+          "column": 1,
+          "row": 1
+        },
+        {
+          "id": "recovery",
+          "label": "Harden jobs and usage budgets",
+          "type": "task",
+          "column": 2,
+          "row": 2
+        },
+        {
+          "id": "pilot",
+          "label": "Run the production-shaped pilot",
+          "type": "task",
+          "column": 0,
+          "row": 1
+        }
+      ],
+      "layers": [
+        {
+          "id": "overview",
+          "title": "Whole picture",
+          "description": "Arrows show prerequisites, not dates. Select a node to inspect its deliverable and release checks.",
+          "color": "green",
+          "nodes": [
+            {
+              "nodeId": "contracts",
+              "summary": "Agree media limits, roles, edit format and fixture clips.",
+              "detail": "Versioned edit schema, endpoint contracts and representative reference-media set.\n\nPlanned checks: Fixtures include variable frame rate, silence, rotated video and multiple audio layouts. Agree proposed 2 GB / 30 minute inputs, 1080p output and concurrency limits before implementation.\n\nStatus: planned"
+            },
+            {
+              "nodeId": "workspace",
+              "summary": "Implement membership checks, library, private signing and interrupted-upload recovery.",
+              "detail": "An authorized editor uploads media and sees processing state.\n\nPlanned checks: Another workspace cannot read, sign, edit or delete the asset. Upload interruption and duplicate completion preserve one asset.\n\nStatus: planned"
+            },
+            {
+              "nodeId": "manual",
+              "summary": "Add proxies, cuts, reorder, undo and immutable export snapshots.",
+              "detail": "A usable editor without AI, exporting the exact reviewed revision.\n\nPlanned checks: Audio/video/captions use a single time mapping. Old revision saves conflict cleanly; refresh restores saved work.\n\nStatus: planned"
+            },
+            {
+              "nodeId": "transcript",
+              "summary": "Connect speech processing and correct timed segments.",
+              "detail": "Searchable transcript linked to media; corrections tracked independently of source audio.\n\nPlanned checks: Provider failure allows retry and leaves manual editing usable. Word/segment timing quality meets the agreed benchmark.\n\nStatus: planned"
+            },
+            {
+              "nodeId": "suggestions",
+              "summary": "Suggest removals or highlights, preview differences, apply selected changes.",
+              "detail": "Validated proposals tied to a transcript and edit revision.\n\nPlanned checks: Malformed or stale suggestions cannot apply. Reject and undo recover the original edit revision; no automatic publish.\n\nStatus: planned"
+            },
+            {
+              "nodeId": "recovery",
+              "summary": "Add cancel, retries, retention, fair scheduling and deletion workflows.",
+              "detail": "A bounded queue with observable lifecycle and resource cleanup.\n\nPlanned checks: Crash after output upload recovers one accepted output. Cancelled/deleted projects cannot receive late worker writes. Repeated requests do not duplicate usage reservations.\n\nStatus: planned"
+            },
+            {
+              "nodeId": "pilot",
+              "summary": "Test approved fixture media and representative users with alarms and restore drills.",
+              "detail": "Measured pilot report, operating limits, support runbook and rollback decision.\n\nPlanned checks: Access matrix, render parity, backup restore and failure injection pass. Measure actual throughput and cost before accepting launch capacity.\n\nStatus: planned"
+            }
+          ],
+          "edges": [
+            {
+              "from": "contracts",
+              "to": "workspace",
+              "label": "Requires",
+              "detail": "Complete Freeze the first editing slice before Protect projects and uploads.",
+              "style": "solid"
+            },
+            {
+              "from": "workspace",
+              "to": "manual",
+              "label": "Requires",
+              "detail": "Complete Protect projects and uploads before Ship manual edit → export.",
+              "style": "solid"
+            },
+            {
+              "from": "manual",
+              "to": "transcript",
+              "label": "Requires",
+              "detail": "Complete Ship manual edit → export before Make the transcript editable.",
+              "style": "solid"
+            },
+            {
+              "from": "transcript",
+              "to": "suggestions",
+              "label": "Requires",
+              "detail": "Complete Make the transcript editable before Add reviewable AI changes.",
+              "style": "solid"
+            },
+            {
+              "from": "manual",
+              "to": "recovery",
+              "label": "Requires",
+              "detail": "Complete Ship manual edit → export before Harden jobs and usage budgets.",
+              "style": "solid"
+            },
+            {
+              "from": "suggestions",
+              "to": "pilot",
+              "label": "Requires",
+              "detail": "Complete Add reviewable AI changes before Run the production-shaped pilot.",
+              "style": "solid"
+            },
+            {
+              "from": "recovery",
+              "to": "pilot",
+              "label": "Requires",
+              "detail": "Complete Harden jobs and usage budgets before Run the production-shaped pilot.",
+              "style": "solid"
+            }
+          ]
+        }
+      ],
+      "groups": [],
+      "walkthroughs": [
+        {
+          "id": "delivery",
+          "title": "How we build this safely",
+          "kind": "reading-guide",
+          "intro": "This is a development dependency map, not what happens each time a user clicks a button.",
+          "result": "The pilot includes useful editing, controlled AI suggestions and tested recovery.",
+          "steps": [
+            {
+              "id": "agree",
+              "title": "Agree what the first version supports",
+              "explanation": "Confirm the files, roles and editing rules before building against guesses.",
+              "nodeIds": [
+                "contracts"
+              ],
+              "edges": []
+            },
+            {
+              "id": "private",
+              "title": "Make projects and uploads private",
+              "explanation": "The editor must not expose one team’s files to another.",
+              "nodeIds": [
+                "contracts",
+                "workspace"
+              ],
+              "edges": [
+                {
+                  "layerId": "overview",
+                  "from": "contracts",
+                  "to": "workspace"
+                }
+              ]
+            },
+            {
+              "id": "manual",
+              "title": "Make manual editing and export work first",
+              "explanation": "Deliver a useful editor before adding an AI dependency.",
+              "nodeIds": [
+                "workspace",
+                "manual"
+              ],
+              "edges": [
+                {
+                  "layerId": "overview",
+                  "from": "workspace",
+                  "to": "manual"
+                }
+              ]
+            },
+            {
+              "id": "ai",
+              "title": "Add transcripts, then suggestions",
+              "explanation": "First make speech readable and correctable; then add proposed edits that a person approves.",
+              "nodeIds": [
+                "manual",
+                "transcript",
+                "suggestions"
+              ],
+              "edges": [
+                {
+                  "layerId": "overview",
+                  "from": "manual",
+                  "to": "transcript"
+                },
+                {
+                  "layerId": "overview",
+                  "from": "transcript",
+                  "to": "suggestions"
+                }
+              ]
+            },
+            {
+              "id": "recovery",
+              "title": "Test failures and spending limits",
+              "explanation": "Recovery work depends on the manual editor and can proceed separately from the AI work. Both must be ready for the pilot.",
+              "nodeIds": [
+                "manual",
+                "recovery",
+                "suggestions",
+                "pilot"
+              ],
+              "edges": [
+                {
+                  "layerId": "overview",
+                  "from": "manual",
+                  "to": "recovery"
+                },
+                {
+                  "layerId": "overview",
+                  "from": "recovery",
+                  "to": "pilot"
+                },
+                {
+                  "layerId": "overview",
+                  "from": "suggestions",
+                  "to": "pilot"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "sections": [
+    {
+      "id": "product",
+      "title": "What someone can actually do",
+      "summary": "",
+      "collapsed": false,
+      "blocks": [
+        {
+          "id": "outcome",
+          "type": "field",
+          "title": "",
+          "collapsed": false,
+          "path": "objective"
+        },
+        {
+          "id": "journey",
+          "type": "diagrams",
+          "title": "",
+          "collapsed": false,
+          "ids": [
+            "editing-journey"
+          ]
+        },
+        {
+          "id": "assumptions",
+          "type": "table",
+          "title": "Proposed pilot boundaries",
+          "collapsed": false,
+          "columns": [
+            "Decision",
+            "Starting assumption",
+            "What still needs agreement"
+          ],
+          "rows": [
+            {
+              "id": "row-0",
+              "cells": [
+                "Users",
+                "Small teams editing interview and social clips.",
+                "Actual target customers and footage."
+              ]
+            },
+            {
+              "id": "row-1",
+              "cells": [
+                "Media",
+                "Up to 2 GB and 30 minutes; one main video track; 1080p export.",
+                "Benchmark before accepting these limits."
+              ]
+            },
+            {
+              "id": "row-2",
+              "cells": [
+                "Concurrency",
+                "One active render per workspace, bounded global worker pool.",
+                "Measure queue time, resource cost and acceptable wait."
+              ]
+            },
+            {
+              "id": "row-3",
+              "cells": [
+                "Collaboration",
+                "Shared projects; one optimistic-revision editor at a time.",
+                "Live concurrent editing is deferred."
+              ]
+            },
+            {
+              "id": "row-4",
+              "cells": [
+                "Storage",
+                "Retention and deletion controls are required.",
+                "No retention period or regional policy has been selected."
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "architecture",
+      "title": "Architecture, ownership and access",
+      "summary": "",
+      "collapsed": true,
+      "blocks": [
+        {
+          "id": "runtime",
+          "type": "diagrams",
+          "title": "",
+          "collapsed": false,
+          "ids": [
+            "runtime"
+          ]
+        },
+        {
+          "id": "stack",
+          "type": "technologies",
+          "title": "Technology choices",
+          "collapsed": true,
+          "ids": [
+            "web",
+            "identity",
+            "postgres",
+            "objects",
+            "jobs",
+            "render",
+            "ai"
+          ]
+        },
+        {
+          "id": "identity",
+          "type": "decisions",
+          "title": "",
+          "collapsed": false,
+          "ids": [
+            "identity-choice"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "contracts",
+      "title": "Data and API contracts that prevent lost edits",
+      "summary": "",
+      "collapsed": true,
+      "blocks": [
+        {
+          "id": "entities",
+          "type": "table",
+          "title": "Records and invariants",
+          "collapsed": false,
+          "columns": [
+            "Record",
+            "Owns",
+            "Invariant"
+          ],
+          "rows": [
+            {
+              "id": "row-0",
+              "cells": [
+                "Workspace / membership",
+                "User role and access boundary.",
+                "Membership is checked server-side; viewer cannot mutate."
+              ]
+            },
+            {
+              "id": "row-1",
+              "cells": [
+                "Asset",
+                "Checksum, object key, duration, frame-rate/time-base and workspace.",
+                "Source object is immutable; untrusted format metadata is inspected."
+              ]
+            },
+            {
+              "id": "row-2",
+              "cells": [
+                "Transcript revision",
+                "Timed text and human corrections.",
+                "Corrections never silently change the original media."
+              ]
+            },
+            {
+              "id": "row-3",
+              "cells": [
+                "Edit revision",
+                "Ordered source ranges, caption choices and audio settings.",
+                "Milliseconds are validated against source bounds; server converts to media time bases."
+              ]
+            },
+            {
+              "id": "row-4",
+              "cells": [
+                "AI proposal",
+                "Base revision, transcript revision, proposed operations.",
+                "Cannot apply if base revision changed or any span is invalid."
+              ]
+            },
+            {
+              "id": "row-5",
+              "cells": [
+                "Render job",
+                "Immutable edit snapshot, attempt, usage, output and cancellation state.",
+                "A job cannot publish into a deleted project or another workspace."
+              ]
+            }
+          ]
+        },
+        {
+          "id": "api",
+          "type": "table",
+          "title": "First API contracts",
+          "collapsed": false,
+          "columns": [
+            "Operation",
+            "Request / result",
+            "Important failure"
+          ],
+          "rows": [
+            {
+              "id": "row-0",
+              "cells": [
+                "POST /projects/:id/uploads",
+                "Media metadata + idempotency key → asset/upload session + signed parts.",
+                "403 membership; 413 configured size limit; 409 duplicate mismatch."
+              ]
+            },
+            {
+              "id": "row-1",
+              "cells": [
+                "POST /uploads/:id/complete",
+                "Part checksums → processing asset; same completion can repeat safely.",
+                "Reject missing parts and mismatched owner; cleanup abandoned uploads."
+              ]
+            },
+            {
+              "id": "row-2",
+              "cells": [
+                "PUT /projects/:id/edit",
+                "Expected revision + validated edit document → new revision.",
+                "409 stale revision returns enough state to recover; never overwrite silently."
+              ]
+            },
+            {
+              "id": "row-3",
+              "cells": [
+                "POST /projects/:id/suggestions",
+                "Base edit + transcript revision + intent → job ID.",
+                "Insufficient budget, unsupported language or changed revision."
+              ]
+            },
+            {
+              "id": "row-4",
+              "cells": [
+                "POST /projects/:id/exports",
+                "Revision + preset + idempotency key → render job ID.",
+                "Invalid range, unsupported profile or budget unavailable."
+              ]
+            },
+            {
+              "id": "row-5",
+              "cells": [
+                "GET /jobs/:id and POST /jobs/:id/cancel",
+                "Persisted progress/result; cancel fences publication.",
+                "403 wrong workspace; reconnect reads status instead of assuming completion."
+              ]
+            }
+          ]
+        },
+        {
+          "id": "edit-example",
+          "type": "code",
+          "title": "Example edit payload — proposed contract",
+          "collapsed": true,
+          "text": "{\n  \"expectedRevision\": 7,\n  \"sourceAssetId\": \"asset_interview\",\n  \"clips\": [\n    {\n      \"id\": \"intro\",\n      \"inMs\": 12000,\n      \"outMs\": 26000\n    },\n    {\n      \"id\": \"answer\",\n      \"inMs\": 48000,\n      \"outMs\": 72000\n    }\n  ],\n  \"captions\": {\n    \"transcriptRevision\": 3,\n    \"mode\": \"burn-in\"\n  },\n  \"audio\": {\n    \"gainDb\": 0\n  }\n}"
+        },
+        {
+          "id": "ownership",
+          "type": "text",
+          "title": "",
+          "collapsed": false,
+          "text": "Workspace ID is derived from the authenticated project lookup, not trusted from the request body. Model output never supplies executable FFmpeg flags or arbitrary file URLs."
+        }
+      ]
+    },
+    {
+      "id": "recovery",
+      "title": "Failures, cost and user control",
+      "summary": "",
+      "collapsed": true,
+      "blocks": [
+        {
+          "id": "states",
+          "type": "diagrams",
+          "title": "",
+          "collapsed": false,
+          "ids": [
+            "job-life"
+          ]
+        },
+        {
+          "id": "failure-checks",
+          "type": "table",
+          "title": "Failures the pilot must demonstrate",
+          "collapsed": false,
+          "columns": [
+            "Trigger",
+            "Visible behavior",
+            "Proof"
+          ],
+          "rows": [
+            {
+              "id": "row-0",
+              "cells": [
+                "Connection drops during upload",
+                "Resume remaining parts without a second asset.",
+                "Interrupt transfer and verify final checksum."
+              ]
+            },
+            {
+              "id": "row-1",
+              "cells": [
+                "Speech provider is unavailable",
+                "Manual editing remains available; transcript job can retry.",
+                "Inject provider timeout and bounded retry."
+              ]
+            },
+            {
+              "id": "row-2",
+              "cells": [
+                "AI proposes nonexistent time spans",
+                "Reject proposal with an understandable reason.",
+                "Validate every operation against source and transcript revisions."
+              ]
+            },
+            {
+              "id": "row-3",
+              "cells": [
+                "Worker dies after output upload",
+                "Recover or clean up temporary output; show one finished export.",
+                "Kill worker between upload and commit."
+              ]
+            },
+            {
+              "id": "row-4",
+              "cells": [
+                "Project deleted during rendering",
+                "Cancel/fence result and purge temporary objects.",
+                "Race deletion against completion and recheck storage."
+              ]
+            },
+            {
+              "id": "row-5",
+              "cells": [
+                "User is removed from workspace",
+                "Existing page loses access on its next authorized request.",
+                "Revoke membership before signing/download/status requests."
+              ]
+            }
+          ]
+        },
+        {
+          "id": "budget",
+          "type": "list",
+          "title": "Operational controls",
+          "collapsed": false,
+          "items": [
+            {
+              "id": "item-0",
+              "label": "Usage",
+              "detail": "Reserve job budget atomically; record actual processing and failed attempts. Define refund/cancellation policy before billing."
+            },
+            {
+              "id": "item-1",
+              "label": "Retention",
+              "detail": "Lifecycle cleanup for abandoned multipart uploads and orphan proxies/exports; deletion audit separate from application content."
+            },
+            {
+              "id": "item-2",
+              "label": "Monitoring",
+              "detail": "Queue age, worker failures, processing duration, output failures, provider errors and spend per workspace."
+            },
+            {
+              "id": "item-3",
+              "label": "Recovery",
+              "detail": "Restore metadata and verify links to object inventory in an isolated environment. Never claim metadata backup alone restores deleted media."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "delivery",
+      "title": "Concrete work slices and launch gates",
+      "summary": "",
+      "collapsed": true,
+      "blocks": [
+        {
+          "id": "order",
+          "type": "diagrams",
+          "title": "",
+          "collapsed": false,
+          "ids": [
+            "build-order"
+          ]
+        },
+        {
+          "id": "tasks",
+          "type": "tasks",
+          "title": "Deliverables and planned checks",
+          "collapsed": false,
+          "ids": [
+            "contracts",
+            "workspace",
+            "manual",
+            "transcript",
+            "suggestions",
+            "recovery",
+            "pilot"
+          ]
+        },
+        {
+          "id": "success",
+          "type": "field",
+          "title": "Release outcomes",
+          "collapsed": false,
+          "path": "success"
+        }
+      ]
+    },
+    {
+      "id": "decisions",
+      "title": "Decisions before implementation",
+      "summary": "",
+      "collapsed": true,
+      "blocks": [
+        {
+          "id": "choices",
+          "type": "decisions",
+          "title": "",
+          "collapsed": false,
+          "ids": [
+            "limits",
+            "provider"
+          ]
+        },
+        {
+          "id": "now",
+          "type": "field",
+          "title": "First release",
+          "collapsed": false,
+          "path": "scope/now"
+        },
+        {
+          "id": "later",
+          "type": "field",
+          "title": "Later",
+          "collapsed": false,
+          "path": "scope/later"
+        },
+        {
+          "id": "out",
+          "type": "field",
+          "title": "Outside this plan",
+          "collapsed": false,
+          "path": "scope/out"
+        }
+      ]
+    }
+  ],
+  "workflow": {
+    "name": "Vertical slices with explicit contracts and release gates",
+    "source": "Authored example for this review; not a generated Superpowers run",
+    "constraints": [
+      "The human approves every AI edit. Original media is immutable.",
+      "Build a manual edit/export slice before adding AI.",
+      "Every API and background job enforces workspace access.",
+      "No microservice split, live collaborative editing or generative footage in the first release."
+    ]
+  }
+}

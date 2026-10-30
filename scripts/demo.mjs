@@ -1,0 +1,15 @@
+import {mkdtemp,readFile} from 'node:fs/promises';
+import os from 'node:os';
+import path from 'node:path';
+import {PlanStore} from '../src/plans.mjs';
+import {saveMarkdownPlan} from '../src/markdown-plan.mjs';
+import {startBoard} from '../src/server.mjs';
+const cwd=await mkdtemp(path.join(os.tmpdir(),'planboard-demo-'));
+const plan=JSON.parse(await readFile(new URL('../examples/products/workspace.json',import.meta.url),'utf8'));
+const store=new PlanStore(cwd);
+const {writeFile}=await import('node:fs/promises');
+await writeFile(path.join(cwd,'example.md'),await readFile(new URL('../examples/demo.md',import.meta.url)));
+await saveMarkdownPlan(store,{plan,markdownPath:'example.md'});
+const board=await startBoard({cwd});
+console.log(`Planboard demo: ${board.url}\nSynthetic example. No agent attached. Data: ${cwd}\nPress Ctrl+C to stop.`);
+for(const signal of ['SIGINT','SIGTERM'])process.on(signal,()=>{void board.close().then(()=>process.exit(0));});

@@ -1,0 +1,83 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { mkdtemp, readFile, rm, symlink } from 'node:fs/promises';
+import os from 'node:os';
+import path from 'node:path';
+import http from 'node:http';
+import { normalize, levels, review, PlanStore, markdown } from '../src/plans.mjs';
+import { startBoard } from '../src/server.mjs';
+const example = JSON.parse(await readFile(new URL('../examples/studio-website.json', import.meta.url)));
+async function setup(t) { const cwd = await mkdtemp(path.join(os.tmpdir(), 'planning-test-')); t.after(() => rm(cwd, { recursive: true, force: true })); return { cwd, store: new PlanStore(cwd) }; }
+test('general plans validate dependencies and report incomplete drafts honestly', () => {
+  for (const kind of ['website', 'webapp', 'software', 'other']) assert.equal(normalize({ title: 'Plan', brief: 'A user request', kind }).kind, kind);
+  const p = normalize(example); assert.deepEqual(review(p).findings, []); assert.equal(levels(p.steps).verify, 3);
+  assert.ok(review(normalize({ title: 'Draft', brief: 'Explore an idea', kind: 'other' })).findings.length >= 4);
+  const cycle = structuredClone(p); cycle.steps[0].dependsOn = ['verify']; assert.throws(() => normalize(cycle), /Circular/);
+  const missing = structuredClone(p); missing.steps[0].dependsOn = ['missing']; assert.throws(() => normalize(missing), /Dependencies/);
+  const duplicate = structuredClone(p); duplicate.questions[0].id = duplicate.steps[0].id; assert.throws(() => normalize(duplicate), /unique/);
+});
+test('revisions retain feedback, preserve old snapshots and reject stale writes', async t => {
+  const { store } = await setup(t); const a = await store.save(example);
+  await store.feedback(a.id, { revision: 1, action: 'accept' });
+  const b = await store.save({ ...example, title: 'Revised plan' }, { id: a.id, expectedRevision: 1 });
+  assert.equal(b.revision, 2); assert.equal(b.feedback[0].revision, 1);
+  const snapshot = JSON.parse(await readFile(path.join(store.root, a.id + '-versions/1.json')));
+  assert.equal(snapshot.plan.title, example.title); assert.equal(snapshot.feedback[0].action, 'accept');
+  await assert.rejects(store.save(example, { id: a.id, expectedRevision: 1 }), /changed/);
+  await assert.rejects(store.feedback(a.id, { revision: 1, action: 'comment', text: 'Stale note' }), /newer revision/);
+  assert.equal((await store.read(a.id)).revision, 2);
+  assert.match(markdown(b), /Revision 1, accept/);
+  await symlink(path.join(store.root, a.id + '.json'), path.join(store.root, 'linked.json'));
+  await assert.rejects(store.read('linked'), /symlinks/);
+  assert.ok((await store.list()).find(x => x.id === 'linked').error);
+});
+test('local API preserves feedback and requires Markdown-first creation through the agent', async t => {
+  const { cwd } = await setup(t);
+  const board = await startBoard({ cwd, onFeedback: async () => { throw new Error('Disconnected'); } }); t.after(() => board.close());
+  const origin = new URL(board.url).origin;
+  const post = (route, data, headers = {}) => fetch(board.url + 'api/' + route, { method: 'POST', headers: { Origin: origin, 'Content-Type': 'application/json', ...headers }, body: JSON.stringify(data) });
+  assert.equal((await fetch(origin)).status, 404);
+  assert.equal((await post('import', example, { Origin: 'https://unrelated.invalid' })).status, 403);
+  const badHost = await new Promise((resolve, reject) => { http.get(board.url, { headers: { Host: 'evil.invalid' } }, response => { response.resume(); resolve(response.statusCode); }).on('error', reject); });
+  assert.equal(badHost, 403);
+  assert.equal((await post('import',example)).status,400);
+  const record=await board.store.save(example);
+  const result = await (await post(`plans/${record.id}/feedback`, { revision: 1, action: 'comment', text: 'Keep this note' })).json();
+  assert.equal(result.delivered, false); assert.equal((await board.store.read(record.id)).feedback[0].text, 'Keep this note');
+  assert.equal((await post('import',await board.store.read(record.id))).status,400);
+  assert.match(await (await fetch(board.url + `api/plans/${record.id}/export?format=md`)).text(), /Keep this note/);
+  assert.equal((await post('start',{title:'Software idea',brief:'Build a local file index',kind:'software'})).status,400);
+});
+test('layered diagrams preserve authored layout, allow system loops and reject broken references', () => {
+  const plan = normalize(example), diagram = plan.diagrams[0];
+  assert.equal(diagram.layers[0].color, 'green'); assert.equal(diagram.nodes[0].column, 0);
+  assert.ok(diagram.layers.at(-1).nodes.length < diagram.nodes.length);
+  const broken = structuredClone(example); broken.diagrams[0].layers[0].edges[0].to = 'missing';
+  assert.throws(() => normalize(broken), /known nodes/);
+  const overlap = structuredClone(example); overlap.diagrams[0].nodes[1].column = 0;
+  assert.throws(() => normalize(overlap), /unique/);
+});
+test('annotations validate exact text and layer, retain original revision, and survive exports', async t => {
+  const { store } = await setup(t), p = await store.save(example);
+  const quote = p.plan.objective.slice(0, 4);
+  const a = await store.feedback(p.id, { revision: 1, action: 'annotate', text: 'Please explain this', annotation: { kind: 'text', field: 'objective', quote, start: 0, end: 4 } });
+  assert.equal(a.annotation.quote, quote); assert.ok(a.annotation.suffix);
+  await assert.rejects(store.feedback(p.id, { revision: 1, action: 'annotate', text: 'Wrong anchor', annotation: { kind: 'text', field: 'objective', quote: 'Other', start: 0, end: 5 } }), /no longer matches/);
+  const diagram = p.plan.diagrams[0];
+  await store.feedback(p.id, { revision: 1, action: 'annotate', text: 'Explain this node', annotation: { kind: 'node', diagramId: diagram.id, layerId: diagram.layers[1].id, nodeId: diagram.nodes[0].id } });
+  await assert.rejects(store.feedback(p.id, { revision: 1, action: 'annotate', text: 'Wrong layer', annotation: { kind: 'node', diagramId: diagram.id, layerId: 'missing', nodeId: diagram.nodes[0].id } }), /no longer exists/);
+  const updated = await store.save({ ...example, objective: 'A new objective' }, { id: p.id, expectedRevision: 1 });
+  assert.equal(updated.feedback[0].revision, 1); assert.equal(updated.feedback[0].annotation.quote, quote);
+  const exported = markdown(updated); assert.match(exported, /```mermaid/); assert.match(exported, /Please explain this/); assert.match(exported, /site-map\/implementation\/home/);
+});
+test('current plan and Markdown snapshot follow explicit activation, retaining notes safely', async t => {
+  const { store } = await setup(t), first = await store.save(example), second = await store.save({ ...example, title: 'Current work' });
+  assert.equal((await store.current()).id, second.id);
+  await store.feedback(second.id, { revision: 1, action: 'annotate', text: 'More room here', annotation: { kind: 'element', elementId: 'feedback:overall' } });
+  assert.match(await readFile(path.join(store.root, 'plan.md'), 'utf8'), /More room here/);
+  await assert.rejects(store.feedback(second.id, { revision: 1, action: 'annotate', text: 'Invalid location', annotation: { kind: 'element', elementId: 'missing' } }), /no longer exists/);
+  await store.activate(first.id); assert.equal((await store.current()).id, first.id);
+  await store.feedback(second.id, { revision: 1, action: 'comment', text: 'Background note' });
+  assert.doesNotMatch(await readFile(path.join(store.root, 'plan.md'), 'utf8'), /Background note/);
+  assert.equal((await store.read(second.id)).feedback.length, 2);
+});

@@ -1,0 +1,1697 @@
+{
+  "schemaVersion": 2,
+  "title": "A local gardener’s business website",
+  "kind": "website",
+  "brief": "A service-led site with real project proof and a reliable quote-request flow. Services, coverage and content require owner confirmation.",
+  "objective": "A local visitor can tell whether the gardener serves their area, find evidence of relevant work, and request a useful quote from their phone.",
+  "success": [
+    "The business owner confirms service coverage and every published claim and photo.",
+    "A visitor can reach the relevant service and request a quote without creating an account.",
+    "A real staging enquiry reaches the managed inbox, the owner can find it if email fails, and errors preserve the visitor’s input."
+  ],
+  "scope": {
+    "now": [
+      "Home, service details, project case studies, coverage, about and quote/contact pages.",
+      "A short accessible enquiry form, phone links, image optimization and owner handover.",
+      "Accurate page metadata, sitemap, redirects and owner-approved privacy/legal content."
+    ],
+    "later": [
+      "A CMS if the owner needs frequent self-editing; multilingual pages if actual demand exists.",
+      "Online booking only after service duration, travel and availability rules are defined."
+    ],
+    "out": [
+      "Customer login, ecommerce, invented location pages or fabricated testimonials.",
+      "An AI chatbot, custom CRM, real-time calendar or complex animation system."
+    ]
+  },
+  "context": [],
+  "technologies": [
+    {
+      "id": "site",
+      "name": "Astro + TypeScript + project CSS",
+      "role": "Generate fast, content-led pages with a small amount of client code.",
+      "status": "proposed",
+      "rationale": "Most visitor tasks are reading, finding proof and sending an enquiry.",
+      "tradeoffs": "An editorial workflow is needed for content changes; inspect any existing site before choosing a rebuild.",
+      "alternatives": [],
+      "dependsOn": [],
+      "impacts": [
+        "Generate fast, content-led pages with a small amount of client code."
+      ],
+      "checks": [
+        "Core navigation, phone links and native form submission work without hydration.",
+        "Production build has correct canonical URLs, image dimensions and no broken internal links."
+      ],
+      "source": "https://docs.astro.build/en/basics/astro-pages/",
+      "versionPlan": "Pin compatible maintained versions after checking the implementation repository and deployment target; no version has been selected in this plan.",
+      "fit": "complement",
+      "fitDetail": "Works with the other components; it serves a distinct responsibility.",
+      "choiceGroup": ""
+    },
+    {
+      "id": "hosting",
+      "name": "Netlify static hosting + Forms",
+      "role": "Serve the site and collect enquiries in a managed inbox.",
+      "status": "proposed",
+      "rationale": "Combine deployment and form handling rather than build a separate application backend.",
+      "tradeoffs": "Review form limits, spam handling, data location and cost before committing.",
+      "alternatives": [],
+      "dependsOn": [
+        "site"
+      ],
+      "impacts": [
+        "Serve the site and collect enquiries in a managed inbox."
+      ],
+      "checks": [
+        "Form is detected in deployed HTML; a real staging submission appears in the inbox.",
+        "Owner can review spam, export and delete submissions; notification failure does not erase the saved enquiry."
+      ],
+      "source": "https://docs.netlify.com/manage/forms/setup/ ; https://docs.netlify.com/manage/forms/submissions/",
+      "versionPlan": "Pin compatible maintained versions after checking the implementation repository and deployment target; no version has been selected in this plan.",
+      "fit": "complement",
+      "fitDetail": "Works with the other components; it serves a distinct responsibility.",
+      "choiceGroup": ""
+    },
+    {
+      "id": "content",
+      "name": "Versioned content files",
+      "role": "Keep services, coverage and approved project stories organized.",
+      "status": "proposed",
+      "rationale": "A small site can start with reviewed files and preview deployments.",
+      "tradeoffs": "An owner who edits often may need a CMS; that is a separate operational decision.",
+      "alternatives": [
+        "Add a CMS only if owner editing requirements justify it."
+      ],
+      "dependsOn": [
+        "site"
+      ],
+      "impacts": [
+        "Keep services, coverage and approved project stories organized."
+      ],
+      "checks": [
+        "Each case study has photo permission, truthful scope and owner approval.",
+        "A preview change can be reviewed and rolled back."
+      ],
+      "source": "Proposed content ownership decision.",
+      "versionPlan": "Pin compatible maintained versions after checking the implementation repository and deployment target; no version has been selected in this plan.",
+      "fit": "complement",
+      "fitDetail": "Works with the other components; it serves a distinct responsibility.",
+      "choiceGroup": ""
+    }
+  ],
+  "steps": [
+    {
+      "id": "discovery",
+      "title": "Confirm the business facts",
+      "summary": "Review the existing site and agree services, coverage and enquiry ownership.",
+      "why": "Review the existing site and agree services, coverage and enquiry ownership.",
+      "deliverable": "Approved content inventory, page map and launch scope.",
+      "acceptance": [
+        "Owner supplies real contact details, coverage boundaries and response promise.",
+        "Existing URLs and useful content are recorded before any replacement."
+      ],
+      "dependsOn": [],
+      "status": "planned"
+    },
+    {
+      "id": "content",
+      "title": "Collect proof and page content",
+      "summary": "Write service pages and real project stories from owner-provided material.",
+      "why": "Write service pages and real project stories from owner-provided material.",
+      "deliverable": "Approved copy, image rights, alt-text context and clear contact prompts.",
+      "acceptance": [
+        "No fabricated quotes, ratings, years of experience or prices.",
+        "Each service explains suitable jobs, exclusions and how quoting works."
+      ],
+      "dependsOn": [
+        "discovery"
+      ],
+      "status": "planned"
+    },
+    {
+      "id": "pages",
+      "title": "Build the reusable page templates",
+      "summary": "Implement navigation, service/project templates and contact components.",
+      "why": "Implement navigation, service/project templates and contact components.",
+      "deliverable": "Responsive pages using shared tokens and controls; content is separate from layout.",
+      "acceptance": [
+        "360px mobile and wide-screen layouts keep a clear reading order.",
+        "Keyboard navigation, focus states, contrast and reduced motion are checked.",
+        "Reuse buttons and form controls instead of creating per-page variants."
+      ],
+      "dependsOn": [
+        "content"
+      ],
+      "status": "planned"
+    },
+    {
+      "id": "enquiry",
+      "title": "Connect and verify the enquiry flow",
+      "summary": "Configure form detection, inbox access, spam handling and notification settings.",
+      "why": "Configure form detection, inbox access, spam handling and notification settings.",
+      "deliverable": "A staged end-to-end enquiry path and owner response procedure.",
+      "acceptance": [
+        "Successful submission is present in the inbox; real notification is checked.",
+        "Invalid, offline and blocked submissions retain values and show recovery/phone contact.",
+        "No personal details leak into URL query strings or analytics."
+      ],
+      "dependsOn": [
+        "pages"
+      ],
+      "status": "planned"
+    },
+    {
+      "id": "launch",
+      "title": "Publish with evidence and a handover",
+      "summary": "Validate content, forms, redirects and ownership on the live domain.",
+      "why": "Validate content, forms, redirects and ownership on the live domain.",
+      "deliverable": "Launch checklist, access handover and tested rollback to the prior deploy.",
+      "acceptance": [
+        "Old URLs redirect individually; canonical URLs and sitemap match the real domain.",
+        "Owner submits, finds and handles an enquiry and can update a service via the agreed process.",
+        "Confirm the live version and repeat one end-to-end enquiry after deployment."
+      ],
+      "dependsOn": [
+        "enquiry"
+      ],
+      "status": "planned"
+    }
+  ],
+  "questions": [
+    {
+      "id": "coverage",
+      "question": "Which jobs and areas should the site qualify?",
+      "why": "A useful enquiry needs a genuine match to the gardener’s services and travel area.",
+      "recommendation": "Get the exact list from the owner; do not make location pages from guesses.",
+      "options": [
+        {
+          "label": "A named service area",
+          "benefit": "Clear coverage information and fewer unsuitable requests.",
+          "tradeoff": "Need real boundary details and an out-of-area answer."
+        },
+        {
+          "label": "Case-by-case travel",
+          "benefit": "Owner can consider larger jobs farther away.",
+          "tradeoff": "The site must explain that eligibility is reviewed."
+        }
+      ]
+    },
+    {
+      "id": "editing",
+      "question": "Who will update services and project photos?",
+      "why": "This determines whether content files are enough or an editor is worth maintaining.",
+      "recommendation": "Start with reviewed content files if updates are occasional.",
+      "options": [
+        {
+          "label": "Developer-assisted updates",
+          "benefit": "Small stack and preview approval.",
+          "tradeoff": "Owner depends on a maintainer for changes."
+        },
+        {
+          "label": "Owner-managed CMS",
+          "benefit": "Owner can publish frequently.",
+          "tradeoff": "Needs roles, training, preview and additional integration checks."
+        }
+      ]
+    },
+    {
+      "id": "contact-choice",
+      "question": "Should visitors request a quote or book a visit?",
+      "why": "Gardening jobs vary in scope, access, travel and seasonal availability.",
+      "recommendation": "Start with quote requests and let the owner arrange a visit.",
+      "options": [
+        {
+          "label": "Request a quote",
+          "benefit": "Fits jobs that need a conversation first.",
+          "tradeoff": "Owner follows up to schedule."
+        },
+        {
+          "label": "Book an assessment",
+          "benefit": "Reduces scheduling messages.",
+          "tradeoff": "Requires calendar ownership, buffers, cancellations and availability rules."
+        }
+      ]
+    }
+  ],
+  "diagrams": [
+    {
+      "id": "sitemap",
+      "title": "Where visitors go and why",
+      "description": "Pages answer distinct visitor questions. The quote form is reachable from every relevant service and project.",
+      "nodes": [
+        {
+          "id": "home",
+          "label": "Home",
+          "type": "page",
+          "column": 0,
+          "row": 0
+        },
+        {
+          "id": "services",
+          "label": "Services",
+          "type": "navigation",
+          "column": 1,
+          "row": 0
+        },
+        {
+          "id": "service",
+          "label": "Service detail",
+          "type": "page",
+          "column": 2,
+          "row": 0
+        },
+        {
+          "id": "projects",
+          "label": "Project stories",
+          "type": "proof",
+          "column": 1,
+          "row": 1
+        },
+        {
+          "id": "area",
+          "label": "Service area",
+          "type": "page",
+          "column": 0,
+          "row": 1
+        },
+        {
+          "id": "quote",
+          "label": "Quote / contact",
+          "type": "form",
+          "column": 2,
+          "row": 1
+        },
+        {
+          "id": "about",
+          "label": "About the team",
+          "type": "person",
+          "column": 0,
+          "row": 2
+        },
+        {
+          "id": "legal",
+          "label": "Privacy / business information",
+          "type": "policy",
+          "column": 1,
+          "row": 2
+        }
+      ],
+      "layers": [
+        {
+          "id": "visitor",
+          "title": "Visitor journey",
+          "description": "Show relevance, prove it, then make contact.",
+          "color": "blue",
+          "nodes": [
+            {
+              "nodeId": "home",
+              "summary": "Is this the right gardener for me?",
+              "detail": "Name the real service and coverage, then offer services, evidence and contact."
+            },
+            {
+              "nodeId": "services",
+              "summary": "Which work can I request?",
+              "detail": "Organize the actual service list; avoid a catalogue of unoffered work."
+            },
+            {
+              "nodeId": "service",
+              "summary": "Does this fit my garden?",
+              "detail": "Scope, exclusions, relevant photos, quote factors and a service-aware enquiry link."
+            },
+            {
+              "nodeId": "projects",
+              "summary": "Can I trust the work?",
+              "detail": "Real before/after material with permission and an honest explanation of the work."
+            },
+            {
+              "nodeId": "area",
+              "summary": "Will they come here?",
+              "detail": "Name actual coverage and explain what happens outside it."
+            },
+            {
+              "nodeId": "quote",
+              "summary": "How do I start?",
+              "detail": "Short form and clickable phone contact; no account needed."
+            }
+          ],
+          "edges": [
+            {
+              "from": "home",
+              "to": "services",
+              "label": "Explore work",
+              "detail": "Help visitors choose the relevant service.",
+              "style": "solid"
+            },
+            {
+              "from": "services",
+              "to": "service",
+              "label": "Select service",
+              "detail": "Each real service has a useful detail page.",
+              "style": "solid"
+            },
+            {
+              "from": "home",
+              "to": "projects",
+              "label": "See evidence",
+              "detail": "Show actual projects.",
+              "style": "solid"
+            },
+            {
+              "from": "home",
+              "to": "area",
+              "label": "Check coverage",
+              "detail": "Let visitors determine whether travel is plausible.",
+              "style": "solid"
+            },
+            {
+              "from": "service",
+              "to": "quote",
+              "label": "Request this service",
+              "detail": "Preselect service in the form without hiding the field.",
+              "style": "solid"
+            },
+            {
+              "from": "projects",
+              "to": "quote",
+              "label": "Discuss a similar job",
+              "detail": "Carry a safe project reference, not personal data.",
+              "style": "solid"
+            },
+            {
+              "from": "area",
+              "to": "quote",
+              "label": "Ask about my area",
+              "detail": "Use postcode/area to qualify, not promise automatic acceptance.",
+              "style": "solid"
+            }
+          ]
+        },
+        {
+          "id": "trust",
+          "title": "Trust and responsibilities",
+          "description": "Trust comes from real evidence and clear ownership.",
+          "color": "green",
+          "nodes": [
+            {
+              "nodeId": "home",
+              "summary": "Is this the right gardener for me?",
+              "detail": "Name the real service and coverage, then offer services, evidence and contact."
+            },
+            {
+              "nodeId": "projects",
+              "summary": "Can I trust the work?",
+              "detail": "Real before/after material with permission and an honest explanation of the work."
+            },
+            {
+              "nodeId": "area",
+              "summary": "Will they come here?",
+              "detail": "Name actual coverage and explain what happens outside it."
+            },
+            {
+              "nodeId": "quote",
+              "summary": "How do I start?",
+              "detail": "Short form and clickable phone contact; no account needed."
+            },
+            {
+              "nodeId": "about",
+              "summary": "Who will visit my home?",
+              "detail": "Real identity, working approach and verifiable qualifications only."
+            },
+            {
+              "nodeId": "legal",
+              "summary": "How are my details used?",
+              "detail": "Owner-approved information appropriate to the business location; no invented legal template claims."
+            }
+          ],
+          "edges": [
+            {
+              "from": "home",
+              "to": "projects",
+              "label": "See evidence",
+              "detail": "Show actual projects.",
+              "style": "solid"
+            },
+            {
+              "from": "home",
+              "to": "area",
+              "label": "Check coverage",
+              "detail": "Let visitors determine whether travel is plausible.",
+              "style": "solid"
+            },
+            {
+              "from": "home",
+              "to": "about",
+              "label": "Meet the team",
+              "detail": "Build trust with factual information.",
+              "style": "solid"
+            },
+            {
+              "from": "projects",
+              "to": "quote",
+              "label": "Discuss a similar job",
+              "detail": "Carry a safe project reference, not personal data.",
+              "style": "solid"
+            },
+            {
+              "from": "area",
+              "to": "quote",
+              "label": "Ask about my area",
+              "detail": "Use postcode/area to qualify, not promise automatic acceptance.",
+              "style": "solid"
+            },
+            {
+              "from": "quote",
+              "to": "legal",
+              "label": "Read data-use details",
+              "detail": "Explain handling at the point of collection.",
+              "style": "solid"
+            }
+          ]
+        }
+      ],
+      "groups": [],
+      "walkthroughs": [
+        {
+          "id": "find-help",
+          "title": "How a visitor finds the right help",
+          "kind": "reading-guide",
+          "intro": "This map shows where information belongs. Visitors can enter on different pages; they do not have to follow one compulsory route.",
+          "result": "A suitable visitor can reach the quote form with enough confidence to contact the gardener.",
+          "steps": [
+            {
+              "id": "recognize",
+              "title": "Understand what the business offers",
+              "explanation": "The home page names the actual work and points visitors to the service list.",
+              "nodeIds": [
+                "home",
+                "services"
+              ],
+              "edges": [
+                {
+                  "layerId": "visitor",
+                  "from": "home",
+                  "to": "services"
+                }
+              ]
+            },
+            {
+              "id": "fit",
+              "title": "Check whether a service fits the job",
+              "explanation": "A service page explains what is included and what needs a quote.",
+              "nodeIds": [
+                "services",
+                "service"
+              ],
+              "edges": [
+                {
+                  "layerId": "visitor",
+                  "from": "services",
+                  "to": "service"
+                }
+              ]
+            },
+            {
+              "id": "trust",
+              "title": "Look for real evidence and real people",
+              "explanation": "Project stories show genuine work; the about page identifies the people behind the business.",
+              "nodeIds": [
+                "home",
+                "projects",
+                "about"
+              ],
+              "edges": [
+                {
+                  "layerId": "visitor",
+                  "from": "home",
+                  "to": "projects"
+                },
+                {
+                  "layerId": "trust",
+                  "from": "home",
+                  "to": "about"
+                }
+              ]
+            },
+            {
+              "id": "area",
+              "title": "Check whether the gardener serves your area",
+              "explanation": "Coverage information avoids an unsuitable request or an unrealistic travel promise.",
+              "nodeIds": [
+                "home",
+                "area"
+              ],
+              "edges": [
+                {
+                  "layerId": "visitor",
+                  "from": "home",
+                  "to": "area"
+                }
+              ]
+            },
+            {
+              "id": "contact",
+              "title": "Request a quote without an account",
+              "explanation": "Service, project and coverage pages lead to contact. The form explains how the visitor’s details will be used.",
+              "nodeIds": [
+                "service",
+                "projects",
+                "area",
+                "quote",
+                "legal"
+              ],
+              "edges": [
+                {
+                  "layerId": "visitor",
+                  "from": "service",
+                  "to": "quote"
+                },
+                {
+                  "layerId": "visitor",
+                  "from": "projects",
+                  "to": "quote"
+                },
+                {
+                  "layerId": "visitor",
+                  "from": "area",
+                  "to": "quote"
+                },
+                {
+                  "layerId": "trust",
+                  "from": "quote",
+                  "to": "legal"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "homepage",
+      "title": "The homepage answers questions in a deliberate order",
+      "description": "This is a section breakdown, not a visual mockup. Each section has a job and a required evidence source.",
+      "nodes": [
+        {
+          "id": "promise",
+          "label": "Service + coverage promise",
+          "type": "section",
+          "column": 0,
+          "row": 0
+        },
+        {
+          "id": "choices",
+          "label": "Find my service",
+          "type": "section",
+          "column": 1,
+          "row": 0
+        },
+        {
+          "id": "proof",
+          "label": "Relevant project proof",
+          "type": "proof",
+          "column": 2,
+          "row": 0
+        },
+        {
+          "id": "process",
+          "label": "How a quote works",
+          "type": "section",
+          "column": 2,
+          "row": 1
+        },
+        {
+          "id": "trust",
+          "label": "Meet the gardener",
+          "type": "person",
+          "column": 1,
+          "row": 1
+        },
+        {
+          "id": "questions",
+          "label": "Practical questions",
+          "type": "faq",
+          "column": 0,
+          "row": 1
+        },
+        {
+          "id": "contact",
+          "label": "Request a quote",
+          "type": "cta",
+          "column": 0,
+          "row": 2
+        }
+      ],
+      "layers": [
+        {
+          "id": "overview",
+          "title": "Whole picture",
+          "description": "This is a section breakdown, not a visual mockup. Each section has a job and a required evidence source.",
+          "color": "green",
+          "nodes": [
+            {
+              "nodeId": "promise",
+              "summary": "What do you do, and where?",
+              "detail": "Owner-approved opening statement, real garden photo and clear quote/phone action."
+            },
+            {
+              "nodeId": "choices",
+              "summary": "Can you help with my job?",
+              "detail": "Link to the actual offered services; do not force a visitor to decode broad slogans."
+            },
+            {
+              "nodeId": "proof",
+              "summary": "What does your work look like?",
+              "detail": "A small selection of real cases with scope, images and permission."
+            },
+            {
+              "nodeId": "process",
+              "summary": "What happens after I ask?",
+              "detail": "Enquiry → owner review → visit if needed → written quote. Confirm this is the real process."
+            },
+            {
+              "nodeId": "trust",
+              "summary": "Who will I deal with?",
+              "detail": "Owner identity, working practices and credentials backed by evidence."
+            },
+            {
+              "nodeId": "questions",
+              "summary": "What might stop me contacting you?",
+              "detail": "Waste handling, access, recurring work, quoting and coverage only as the owner actually offers them."
+            },
+            {
+              "nodeId": "contact",
+              "summary": "What should I do next?",
+              "detail": "A short request action and phone alternative with an honest response expectation."
+            }
+          ],
+          "edges": [
+            {
+              "from": "promise",
+              "to": "choices",
+              "label": "Find relevance",
+              "detail": "Help the visitor recognize their job.",
+              "style": "solid"
+            },
+            {
+              "from": "choices",
+              "to": "proof",
+              "label": "Build confidence",
+              "detail": "Match proof to the offered work.",
+              "style": "solid"
+            },
+            {
+              "from": "proof",
+              "to": "process",
+              "label": "Reduce uncertainty",
+              "detail": "Explain the next steps.",
+              "style": "solid"
+            },
+            {
+              "from": "process",
+              "to": "trust",
+              "label": "Know the person",
+              "detail": "Identify who handles the work.",
+              "style": "solid"
+            },
+            {
+              "from": "trust",
+              "to": "questions",
+              "label": "Resolve concerns",
+              "detail": "Answer practical barriers.",
+              "style": "solid"
+            },
+            {
+              "from": "questions",
+              "to": "contact",
+              "label": "Make contact",
+              "detail": "Offer a clear next action.",
+              "style": "solid"
+            }
+          ]
+        }
+      ],
+      "groups": [],
+      "walkthroughs": [
+        {
+          "id": "reading-order",
+          "title": "What the homepage explains",
+          "kind": "reading-guide",
+          "intro": "Read this as the order of questions the page answers, not a technical process.",
+          "result": "The visitor knows whether the business fits and what contacting it will involve.",
+          "steps": [
+            {
+              "id": "promise",
+              "title": "Say what you do and where",
+              "explanation": "Start with the service and real coverage so the visitor can recognize a match.",
+              "nodeIds": [
+                "promise"
+              ],
+              "edges": []
+            },
+            {
+              "id": "service",
+              "title": "Help the visitor find their kind of job",
+              "explanation": "Use real services rather than broad slogans.",
+              "nodeIds": [
+                "promise",
+                "choices"
+              ],
+              "edges": [
+                {
+                  "layerId": "overview",
+                  "from": "promise",
+                  "to": "choices"
+                }
+              ]
+            },
+            {
+              "id": "proof",
+              "title": "Show relevant work",
+              "explanation": "Use actual project photos and explanations that support the offered services.",
+              "nodeIds": [
+                "choices",
+                "proof"
+              ],
+              "edges": [
+                {
+                  "layerId": "overview",
+                  "from": "choices",
+                  "to": "proof"
+                }
+              ]
+            },
+            {
+              "id": "process",
+              "title": "Explain what happens after an enquiry",
+              "explanation": "Describe the real quote process and introduce the person who handles the work.",
+              "nodeIds": [
+                "proof",
+                "process",
+                "trust"
+              ],
+              "edges": [
+                {
+                  "layerId": "overview",
+                  "from": "proof",
+                  "to": "process"
+                },
+                {
+                  "layerId": "overview",
+                  "from": "process",
+                  "to": "trust"
+                }
+              ]
+            },
+            {
+              "id": "contact",
+              "title": "Answer practical questions and offer contact",
+              "explanation": "Resolve common concerns, then give a clear quote or phone option.",
+              "nodeIds": [
+                "trust",
+                "questions",
+                "contact"
+              ],
+              "edges": [
+                {
+                  "layerId": "overview",
+                  "from": "trust",
+                  "to": "questions"
+                },
+                {
+                  "layerId": "overview",
+                  "from": "questions",
+                  "to": "contact"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "lead-flow",
+      "title": "An enquiry is a managed process, not just an email",
+      "description": "The site collects a request; the gardener confirms whether the job fits and arranges the next step. An acknowledgement is not a booking.",
+      "nodes": [
+        {
+          "id": "visitor",
+          "label": "Visitor",
+          "type": "customer",
+          "column": 0,
+          "row": 0
+        },
+        {
+          "id": "form",
+          "label": "Accessible quote form",
+          "type": "form",
+          "column": 1,
+          "row": 0
+        },
+        {
+          "id": "inbox",
+          "label": "Managed submissions inbox",
+          "type": "service",
+          "column": 2,
+          "row": 0
+        },
+        {
+          "id": "thanks",
+          "label": "Acknowledgement",
+          "type": "state",
+          "column": 1,
+          "row": 1
+        },
+        {
+          "id": "mail",
+          "label": "Owner notification",
+          "type": "message",
+          "column": 2,
+          "row": 1
+        },
+        {
+          "id": "owner",
+          "label": "Owner reviews request",
+          "type": "person",
+          "column": 2,
+          "row": 2
+        },
+        {
+          "id": "retry",
+          "label": "Error / phone fallback",
+          "type": "risk",
+          "column": 0,
+          "row": 1
+        }
+      ],
+      "layers": [
+        {
+          "id": "overview",
+          "title": "Whole picture",
+          "description": "The site collects a request; the gardener confirms whether the job fits and arranges the next step. An acknowledgement is not a booking.",
+          "color": "green",
+          "nodes": [
+            {
+              "nodeId": "visitor",
+              "summary": "Describe the job.",
+              "detail": "Phone contact stays available if the form cannot be used."
+            },
+            {
+              "nodeId": "form",
+              "summary": "Service, area, contact and job summary.",
+              "detail": "Labels and native semantics remain; styles follow the project’s shared input components."
+            },
+            {
+              "nodeId": "inbox",
+              "summary": "Persist the submitted request.",
+              "detail": "Configure deployed form detection and prove a staging request is recorded; review spam separately."
+            },
+            {
+              "nodeId": "thanks",
+              "summary": "Explain what happens next.",
+              "detail": "Show success only after the provider accepts the submission; do not promise an unconfirmed appointment."
+            },
+            {
+              "nodeId": "mail",
+              "summary": "Alert the responsible person.",
+              "detail": "Test notification delivery. The inbox remains the record if notification is missed."
+            },
+            {
+              "nodeId": "owner",
+              "summary": "Confirm fit and follow up.",
+              "detail": "Check coverage, service, access and timing; agree a response promise the business can keep."
+            },
+            {
+              "nodeId": "retry",
+              "summary": "Preserve details and offer a next step.",
+              "detail": "Network failure keeps typed values for retry. Do not report success without acceptance."
+            }
+          ],
+          "edges": [
+            {
+              "from": "visitor",
+              "to": "form",
+              "label": "Start request",
+              "detail": "No account or payment required.",
+              "style": "solid"
+            },
+            {
+              "from": "form",
+              "to": "inbox",
+              "label": "Submit",
+              "detail": "Validate useful contact information and configured field limits.",
+              "style": "solid"
+            },
+            {
+              "from": "inbox",
+              "to": "thanks",
+              "label": "Accepted",
+              "detail": "Clearly distinguish receipt from booking.",
+              "style": "solid"
+            },
+            {
+              "from": "inbox",
+              "to": "mail",
+              "label": "Notify",
+              "detail": "Notification settings and recipient are checked in staging.",
+              "style": "solid"
+            },
+            {
+              "from": "mail",
+              "to": "owner",
+              "label": "Review lead",
+              "detail": "Owner responds using the agreed working process.",
+              "style": "solid"
+            },
+            {
+              "from": "inbox",
+              "to": "owner",
+              "label": "Inbox fallback",
+              "detail": "Owner can find accepted and spam-filtered submissions.",
+              "style": "dashed"
+            },
+            {
+              "from": "form",
+              "to": "retry",
+              "label": "Cannot submit",
+              "detail": "Keep input and expose readable errors.",
+              "style": "dashed"
+            },
+            {
+              "from": "retry",
+              "to": "visitor",
+              "label": "Retry or call",
+              "detail": "Provide the real phone number; no silent loss.",
+              "style": "dashed"
+            }
+          ]
+        }
+      ],
+      "groups": [],
+      "walkthroughs": [
+        {
+          "id": "enquiry",
+          "title": "Send an enquiry",
+          "kind": "journey",
+          "intro": "Imagine you need help with your garden and want to ask for a quote.",
+          "result": "The business receives a request it can review. This is not an appointment booking.",
+          "steps": [
+            {
+              "id": "describe",
+              "title": "You describe the job",
+              "explanation": "Choose a service, give your area and leave useful contact details. No account or payment is needed.",
+              "nodeIds": [
+                "visitor",
+                "form"
+              ],
+              "edges": [
+                {
+                  "layerId": "overview",
+                  "from": "visitor",
+                  "to": "form"
+                }
+              ]
+            },
+            {
+              "id": "send",
+              "title": "The form sends your request",
+              "explanation": "The website checks the fields and sends them to the managed inbox, where submissions are stored.",
+              "nodeIds": [
+                "form",
+                "inbox"
+              ],
+              "edges": [
+                {
+                  "layerId": "overview",
+                  "from": "form",
+                  "to": "inbox"
+                }
+              ]
+            },
+            {
+              "id": "receipt",
+              "title": "You see that it was received",
+              "explanation": "Only show confirmation once the service accepts the request. Explain the business’s agreed next step.",
+              "nodeIds": [
+                "inbox",
+                "thanks"
+              ],
+              "edges": [
+                {
+                  "layerId": "overview",
+                  "from": "inbox",
+                  "to": "thanks"
+                }
+              ]
+            },
+            {
+              "id": "notify",
+              "title": "The gardener is notified",
+              "explanation": "An email alerts the owner. The inbox is still available if that email is missed.",
+              "nodeIds": [
+                "inbox",
+                "mail",
+                "owner"
+              ],
+              "edges": [
+                {
+                  "layerId": "overview",
+                  "from": "inbox",
+                  "to": "mail"
+                },
+                {
+                  "layerId": "overview",
+                  "from": "mail",
+                  "to": "owner"
+                },
+                {
+                  "layerId": "overview",
+                  "from": "inbox",
+                  "to": "owner"
+                }
+              ]
+            },
+            {
+              "id": "follow-up",
+              "title": "The owner checks whether the job fits",
+              "explanation": "The owner reviews coverage, scope and timing, then contacts you to discuss a quote or a visit.",
+              "nodeIds": [
+                "owner"
+              ],
+              "edges": []
+            },
+            {
+              "id": "failure",
+              "title": "If sending fails, your details stay on screen",
+              "explanation": "Show a readable error, offer retry and keep the phone option available. Never pretend a failed request succeeded.",
+              "nodeIds": [
+                "form",
+                "retry",
+                "visitor"
+              ],
+              "edges": [
+                {
+                  "layerId": "overview",
+                  "from": "form",
+                  "to": "retry"
+                },
+                {
+                  "layerId": "overview",
+                  "from": "retry",
+                  "to": "visitor"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "site-delivery",
+      "title": "Build only what the business needs to operate",
+      "description": "Arrows show prerequisites, not dates. Select a node to inspect its deliverable and release checks.",
+      "nodes": [
+        {
+          "id": "discovery",
+          "label": "Confirm the business facts",
+          "type": "task",
+          "column": 0,
+          "row": 0
+        },
+        {
+          "id": "content",
+          "label": "Collect proof and page content",
+          "type": "task",
+          "column": 1,
+          "row": 0
+        },
+        {
+          "id": "pages",
+          "label": "Build the reusable page templates",
+          "type": "task",
+          "column": 2,
+          "row": 0
+        },
+        {
+          "id": "enquiry",
+          "label": "Connect and verify the enquiry flow",
+          "type": "task",
+          "column": 2,
+          "row": 1
+        },
+        {
+          "id": "launch",
+          "label": "Publish with evidence and a handover",
+          "type": "task",
+          "column": 1,
+          "row": 1
+        }
+      ],
+      "layers": [
+        {
+          "id": "overview",
+          "title": "Whole picture",
+          "description": "Arrows show prerequisites, not dates. Select a node to inspect its deliverable and release checks.",
+          "color": "green",
+          "nodes": [
+            {
+              "nodeId": "discovery",
+              "summary": "Review the existing site and agree services, coverage and enquiry ownership.",
+              "detail": "Approved content inventory, page map and launch scope.\n\nPlanned checks: Owner supplies real contact details, coverage boundaries and response promise. Existing URLs and useful content are recorded before any replacement.\n\nStatus: planned"
+            },
+            {
+              "nodeId": "content",
+              "summary": "Write service pages and real project stories from owner-provided material.",
+              "detail": "Approved copy, image rights, alt-text context and clear contact prompts.\n\nPlanned checks: No fabricated quotes, ratings, years of experience or prices. Each service explains suitable jobs, exclusions and how quoting works.\n\nStatus: planned"
+            },
+            {
+              "nodeId": "pages",
+              "summary": "Implement navigation, service/project templates and contact components.",
+              "detail": "Responsive pages using shared tokens and controls; content is separate from layout.\n\nPlanned checks: 360px mobile and wide-screen layouts keep a clear reading order. Keyboard navigation, focus states, contrast and reduced motion are checked. Reuse buttons and form controls instead of creating per-page variants.\n\nStatus: planned"
+            },
+            {
+              "nodeId": "enquiry",
+              "summary": "Configure form detection, inbox access, spam handling and notification settings.",
+              "detail": "A staged end-to-end enquiry path and owner response procedure.\n\nPlanned checks: Successful submission is present in the inbox; real notification is checked. Invalid, offline and blocked submissions retain values and show recovery/phone contact. No personal details leak into URL query strings or analytics.\n\nStatus: planned"
+            },
+            {
+              "nodeId": "launch",
+              "summary": "Validate content, forms, redirects and ownership on the live domain.",
+              "detail": "Launch checklist, access handover and tested rollback to the prior deploy.\n\nPlanned checks: Old URLs redirect individually; canonical URLs and sitemap match the real domain. Owner submits, finds and handles an enquiry and can update a service via the agreed process. Confirm the live version and repeat one end-to-end enquiry after deployment.\n\nStatus: planned"
+            }
+          ],
+          "edges": [
+            {
+              "from": "discovery",
+              "to": "content",
+              "label": "Requires",
+              "detail": "Complete Confirm the business facts before Collect proof and page content.",
+              "style": "solid"
+            },
+            {
+              "from": "content",
+              "to": "pages",
+              "label": "Requires",
+              "detail": "Complete Collect proof and page content before Build the reusable page templates.",
+              "style": "solid"
+            },
+            {
+              "from": "pages",
+              "to": "enquiry",
+              "label": "Requires",
+              "detail": "Complete Build the reusable page templates before Connect and verify the enquiry flow.",
+              "style": "solid"
+            },
+            {
+              "from": "enquiry",
+              "to": "launch",
+              "label": "Requires",
+              "detail": "Complete Connect and verify the enquiry flow before Publish with evidence and a handover.",
+              "style": "solid"
+            }
+          ]
+        }
+      ],
+      "groups": [],
+      "walkthroughs": [
+        {
+          "id": "build",
+          "title": "From business facts to a working website",
+          "kind": "reading-guide",
+          "intro": "These are build dependencies. The site is not ready just because its pages look finished.",
+          "result": "The owner can receive real enquiries and maintain the site through the agreed process.",
+          "steps": [
+            {
+              "id": "facts",
+              "title": "Confirm what the business actually offers",
+              "explanation": "Collect real services, coverage, contact details and existing content.",
+              "nodeIds": [
+                "discovery"
+              ],
+              "edges": []
+            },
+            {
+              "id": "content",
+              "title": "Prepare truthful copy and project evidence",
+              "explanation": "Get the owner’s approval and photo permissions before publishing claims.",
+              "nodeIds": [
+                "discovery",
+                "content"
+              ],
+              "edges": [
+                {
+                  "layerId": "overview",
+                  "from": "discovery",
+                  "to": "content"
+                }
+              ]
+            },
+            {
+              "id": "pages",
+              "title": "Build reusable, accessible pages",
+              "explanation": "Use shared components so forms and navigation behave consistently.",
+              "nodeIds": [
+                "content",
+                "pages"
+              ],
+              "edges": [
+                {
+                  "layerId": "overview",
+                  "from": "content",
+                  "to": "pages"
+                }
+              ]
+            },
+            {
+              "id": "form",
+              "title": "Prove an enquiry reaches the business",
+              "explanation": "Test the stored request, email notification and recovery when sending fails.",
+              "nodeIds": [
+                "pages",
+                "enquiry"
+              ],
+              "edges": [
+                {
+                  "layerId": "overview",
+                  "from": "pages",
+                  "to": "enquiry"
+                }
+              ]
+            },
+            {
+              "id": "launch",
+              "title": "Check the live site and hand it over",
+              "explanation": "Verify links, contact, content and the update/rollback process on the real domain.",
+              "nodeIds": [
+                "enquiry",
+                "launch"
+              ],
+              "edges": [
+                {
+                  "layerId": "overview",
+                  "from": "enquiry",
+                  "to": "launch"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "sections": [
+    {
+      "id": "journey",
+      "title": "How this site earns a useful enquiry",
+      "summary": "",
+      "collapsed": false,
+      "blocks": [
+        {
+          "id": "outcome",
+          "type": "field",
+          "title": "",
+          "collapsed": false,
+          "path": "objective"
+        },
+        {
+          "id": "pages",
+          "type": "diagrams",
+          "title": "",
+          "collapsed": false,
+          "ids": [
+            "sitemap"
+          ]
+        },
+        {
+          "id": "assumptions",
+          "type": "text",
+          "title": "",
+          "collapsed": false,
+          "text": "Working assumption: an independent gardener serving a defined local area, offering quote-based work. The real services, location, business name, photos and response times must come from the owner."
+        }
+      ]
+    },
+    {
+      "id": "content",
+      "title": "What belongs on each page",
+      "summary": "",
+      "collapsed": true,
+      "blocks": [
+        {
+          "id": "home",
+          "type": "diagrams",
+          "title": "",
+          "collapsed": false,
+          "ids": [
+            "homepage"
+          ]
+        },
+        {
+          "id": "content-inventory",
+          "type": "table",
+          "title": "Content the owner needs to supply",
+          "collapsed": false,
+          "columns": [
+            "Page / component",
+            "Real material required",
+            "Acceptance"
+          ],
+          "rows": [
+            {
+              "id": "row-0",
+              "cells": [
+                "Service page",
+                "Offered work, exclusions, suitable jobs, quote factors, relevant photos.",
+                "Visitor can explain whether their job fits."
+              ]
+            },
+            {
+              "id": "row-1",
+              "cells": [
+                "Project story",
+                "Permissioned before/after images, job scope and truthful result.",
+                "No stock photo is presented as completed work."
+              ]
+            },
+            {
+              "id": "row-2",
+              "cells": [
+                "Coverage",
+                "Actual areas, travel rules and how out-of-area requests are handled.",
+                "No invented local-office or service-area claims."
+              ]
+            },
+            {
+              "id": "row-3",
+              "cells": [
+                "About / contact",
+                "Business identity, contact details, real credentials and operating process.",
+                "Owner confirms accuracy and can receive enquiries."
+              ]
+            },
+            {
+              "id": "row-4",
+              "cells": [
+                "Shared controls",
+                "Project button/input styles, native labels and error/focus states.",
+                "Components are reused across pages and work with keyboard/mobile."
+              ]
+            }
+          ]
+        },
+        {
+          "id": "ownership",
+          "type": "decisions",
+          "title": "",
+          "collapsed": false,
+          "ids": [
+            "editing"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "enquiries",
+      "title": "What happens after someone contacts the business",
+      "summary": "",
+      "collapsed": true,
+      "blocks": [
+        {
+          "id": "lead",
+          "type": "diagrams",
+          "title": "",
+          "collapsed": false,
+          "ids": [
+            "lead-flow"
+          ]
+        },
+        {
+          "id": "fields",
+          "type": "table",
+          "title": "The quote form",
+          "collapsed": false,
+          "columns": [
+            "Field",
+            "Requirement",
+            "Why it belongs"
+          ],
+          "rows": [
+            {
+              "id": "row-0",
+              "cells": [
+                "Name",
+                "Required, reasonable length limit.",
+                "Owner knows who to contact."
+              ]
+            },
+            {
+              "id": "row-1",
+              "cells": [
+                "Email",
+                "Required valid email.",
+                "A reliable reply address for the first version; phone remains an optional alternative channel."
+              ]
+            },
+            {
+              "id": "row-2",
+              "cells": [
+                "Phone",
+                "Optional, allow international format.",
+                "Useful if the visitor prefers a call."
+              ]
+            },
+            {
+              "id": "row-3",
+              "cells": [
+                "Service",
+                "Required selection from real services; include “Not sure”.",
+                "Direct the request without forcing an incorrect category."
+              ]
+            },
+            {
+              "id": "row-4",
+              "cells": [
+                "Postcode / area",
+                "Required, do not request full address initially.",
+                "Check travel fit before collecting unnecessary details."
+              ]
+            },
+            {
+              "id": "row-5",
+              "cells": [
+                "Job description",
+                "Required, bounded text; no attachment upload in v1.",
+                "Owner can decide what to ask next."
+              ]
+            },
+            {
+              "id": "row-6",
+              "cells": [
+                "Preferred timing",
+                "Optional, no promise of availability.",
+                "Helps qualification without implying a booking."
+              ]
+            }
+          ]
+        },
+        {
+          "id": "states",
+          "type": "list",
+          "title": "States to implement and verify",
+          "collapsed": false,
+          "items": [
+            {
+              "id": "item-0",
+              "label": "Empty and invalid",
+              "detail": "Associated labels, readable error summary, inline field errors and retained values."
+            },
+            {
+              "id": "item-1",
+              "label": "Submitting",
+              "detail": "Prevent accidental double click while preserving a usable recovery path."
+            },
+            {
+              "id": "item-2",
+              "label": "Accepted",
+              "detail": "Clear receipt and owner-approved expectation; no false booking confirmation."
+            },
+            {
+              "id": "item-3",
+              "label": "Offline / provider rejection",
+              "detail": "Keep input, explain retry and show phone contact."
+            },
+            {
+              "id": "item-4",
+              "label": "Spam / missed email",
+              "detail": "Owner can inspect the provider inbox and spam; staged checks include both notification and stored record."
+            }
+          ]
+        },
+        {
+          "id": "contact-decision",
+          "type": "decisions",
+          "title": "",
+          "collapsed": false,
+          "ids": [
+            "contact-choice"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "implementation",
+      "title": "A small stack with a concrete delivery plan",
+      "summary": "",
+      "collapsed": true,
+      "blocks": [
+        {
+          "id": "stack",
+          "type": "technologies",
+          "title": "Tools that work together",
+          "collapsed": false,
+          "ids": [
+            "site",
+            "hosting",
+            "content"
+          ]
+        },
+        {
+          "id": "no-extra-backend",
+          "type": "text",
+          "title": "",
+          "collapsed": false,
+          "text": "No customer authentication, custom database, React app shell or booking engine is needed for the agreed enquiry-only scope. Owner access to the hosting/form provider is separate from visitor access."
+        },
+        {
+          "id": "delivery",
+          "type": "diagrams",
+          "title": "",
+          "collapsed": false,
+          "ids": [
+            "site-delivery"
+          ]
+        },
+        {
+          "id": "work",
+          "type": "tasks",
+          "title": "Work packets",
+          "collapsed": false,
+          "ids": [
+            "discovery",
+            "content",
+            "pages",
+            "enquiry",
+            "launch"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "launch",
+      "title": "Launch evidence and business decisions",
+      "summary": "",
+      "collapsed": true,
+      "blocks": [
+        {
+          "id": "success",
+          "type": "field",
+          "title": "What must be true at launch",
+          "collapsed": false,
+          "path": "success"
+        },
+        {
+          "id": "launch-checks",
+          "type": "table",
+          "title": "Checks before and after launch",
+          "collapsed": false,
+          "columns": [
+            "Area",
+            "Demonstration"
+          ],
+          "rows": [
+            {
+              "id": "row-0",
+              "cells": [
+                "Enquiry",
+                "Submit on the real domain; find the saved request; receive notification; owner knows the follow-up process."
+              ]
+            },
+            {
+              "id": "row-1",
+              "cells": [
+                "Accessibility",
+                "Keyboard-only completion, correct labels/error focus, contrast checks, touch targets and no page overflow."
+              ]
+            },
+            {
+              "id": "row-2",
+              "cells": [
+                "Content",
+                "Owner verifies service coverage, claims, photo permissions, contact details and data-use information."
+              ]
+            },
+            {
+              "id": "row-3",
+              "cells": [
+                "Search basics",
+                "Unique titles/descriptions, real business details, sitemap, correct canonical URLs and old-route redirects. No search-ranking promise."
+              ]
+            },
+            {
+              "id": "row-4",
+              "cells": [
+                "Performance",
+                "Optimized images with dimensions, minimal scripts, mobile network checks and no layout shift from unloaded images."
+              ]
+            },
+            {
+              "id": "row-5",
+              "cells": [
+                "Operations",
+                "Domain and provider ownership, backups/export, update responsibility and rollback to previous deployment."
+              ]
+            }
+          ]
+        },
+        {
+          "id": "area",
+          "type": "decisions",
+          "title": "",
+          "collapsed": false,
+          "ids": [
+            "coverage"
+          ]
+        },
+        {
+          "id": "now",
+          "type": "field",
+          "title": "Included",
+          "collapsed": false,
+          "path": "scope/now"
+        },
+        {
+          "id": "later",
+          "type": "field",
+          "title": "Optional later work",
+          "collapsed": false,
+          "path": "scope/later"
+        },
+        {
+          "id": "out",
+          "type": "field",
+          "title": "Excluded",
+          "collapsed": false,
+          "path": "scope/out"
+        }
+      ]
+    }
+  ],
+  "workflow": {
+    "name": "Visitor questions → page structure → enquiry → launch",
+    "source": "Authored planning example for this review; no existing business repository supplied",
+    "constraints": [
+      "Reuse the existing site, components and content if a repository already exists.",
+      "Only publish service areas, claims, photos and reviews approved by the business owner.",
+      "Start with enquiries and phone contact; no customer accounts, booking engine, checkout or custom database."
+    ]
+  }
+}

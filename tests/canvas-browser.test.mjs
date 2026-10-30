@@ -1,0 +1,36 @@
+import {openReviewDetails,openSection} from './review-helpers.mjs';
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {mkdtemp,readFile,rm} from 'node:fs/promises';
+import os from 'node:os';import path from 'node:path';
+import {chromium} from 'playwright';
+import {startBoard} from '../src/server.mjs';
+const plan=JSON.parse(await readFile(new URL('../examples/login-flow.json',import.meta.url)));
+test('typed map supports pan, zoom, fit, stable semantic colors and annotations at transformed positions', {timeout:60000},async t=>{
+ const cwd=await mkdtemp(path.join(os.tmpdir(),'typed-canvas-'));t.after(()=>rm(cwd,{recursive:true,force:true}));const board=await startBoard({cwd});t.after(()=>board.close());const record=await board.store.save(plan);
+ const browser=await chromium.launch({channel:process.env.PLANBOARD_BROWSER_CHANNEL,headless:true});t.after(()=>browser.close());const page=await browser.newPage({viewport:{width:1440,height:1000}});const errors=[];page.on('pageerror',e=>errors.push(e.message));
+ await page.goto(board.url);await openReviewDetails(page);const map=page.locator('.system-scroll').first(),scene=map.locator('.system-canvas'),root=page.locator('.system-diagram').first();await map.waitFor();await map.scrollIntoViewIfNeeded();
+ const state=()=>scene.evaluate(n=>({x:+n.dataset.panX,y:+n.dataset.panY,scale:+n.dataset.scale}));await page.waitForFunction(()=>Number(document.querySelector('.system-canvas').dataset.scale)>0);
+ assert.equal(await map.evaluate(n=>getComputedStyle(n).overflow),'clip');assert.equal(await root.locator('.diagram-region').count(),3);assert.equal(await root.locator('[data-type=auth]').count(),2);
+ const server=root.locator('[data-node=server]'),color=await server.evaluate(n=>getComputedStyle(n).borderTopColor);await root.locator('[data-layer=technology]').click();assert.equal(await server.evaluate(n=>getComputedStyle(n).borderTopColor),color);
+ await root.getByRole('button',{name:'All layers',exact:true}).click();await map.scrollIntoViewIfNeeded();const initial=await state(),r=await map.boundingBox();
+ await page.mouse.move(r.x+22,r.y+25);await page.mouse.down();await page.mouse.move(r.x+72,r.y+55,{steps:6});await page.mouse.up();const panned=await state();assert.ok(Math.abs(panned.x-initial.x-50)<2);assert.ok(Math.abs(panned.y-initial.y-30)<2);
+ await map.focus();await page.keyboard.press('+');assert.ok((await state()).scale>initial.scale);await page.keyboard.press('ArrowRight');assert.ok((await state()).x<panned.x);await page.keyboard.press('Home');assert.ok(Math.abs((await state()).scale-initial.scale)<.001);
+ await page.mouse.move(r.x+r.width/2,r.y+r.height/2);await page.mouse.wheel(0,-180);await page.waitForTimeout(150);assert.equal((await state()).scale,initial.scale);await map.scrollIntoViewIfNeeded();const wheelRect=await map.boundingBox();await page.mouse.move(wheelRect.x+wheelRect.width/2,wheelRect.y+wheelRect.height/2);await page.keyboard.down('Control');await page.mouse.wheel(0,-180);await page.keyboard.up('Control');await page.waitForTimeout(150);assert.ok((await state()).scale>initial.scale);await root.getByRole('button',{name:'Fit map',exact:true}).click();
+ await page.locator('#annotate-toggle').click();await server.click();await page.getByLabel('Requested change',{exact:true}).fill('Keep this API responsibility clear.');await page.getByRole('button',{name:'Save for review',exact:true}).click();await page.locator('#ask-dialog').waitFor({state:'hidden'});await page.locator('#annotate-toggle').click();await map.scrollIntoViewIfNeeded();
+ const saved=await board.store.read(record.id);assert.equal(saved.feedback[0].annotation.nodeId,'server');assert.ok(plan.diagrams[0].layers.some(l=>l.id===saved.feedback[0].annotation.layerId));
+ const pin=page.locator('.comment-pin').first();await pin.waitFor();const pinBefore=await pin.boundingBox();const rect=await map.boundingBox();await page.mouse.move(rect.x+20,rect.y+20);await page.mouse.down();await page.mouse.move(rect.x+55,rect.y+20,{steps:5});await page.mouse.up();await page.waitForTimeout(100);const pinAfter=await pin.boundingBox();assert.ok(Math.abs(pinAfter.x-pinBefore.x-35)<2,JSON.stringify({pinBefore,pinAfter,rect,state:await state(),node:await server.boundingBox()}));
+ await root.getByRole('button',{name:'Fit map',exact:true}).click();await page.locator('#annotate-toggle').click();await root.locator('.region-title').first().click();await page.getByLabel('Requested change',{exact:true}).fill('Region annotation');await page.getByRole('button',{name:'Save for review',exact:true}).click();await page.locator('#ask-dialog').waitFor({state:'hidden'});assert.match((await board.store.read(record.id)).feedback[1].annotation.field,/groups/);
+ await page.locator('#annotate-toggle').click();await page.setViewportSize({width:390,height:844});await map.scrollIntoViewIfNeeded();await root.getByRole('button',{name:'Actual size',exact:true}).click();assert.equal((await state()).scale,1);await root.locator('[data-node=accounts]').focus();assert.equal(await map.evaluate(n=>n.scrollLeft),0);
+ const nodeRect=await root.locator('[data-node=accounts]').boundingBox(),mapRect=await map.boundingBox();assert.ok(nodeRect.x>=mapRect.x&&nodeRect.x+nodeRect.width<=mapRect.x+mapRect.width);
+ await root.getByRole('button',{name:'Fit map',exact:true}).click();assert.ok((await state()).scale<.5);assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);
+ await page.evaluate(await readFile(new URL('../node_modules/axe-core/axe.min.js',import.meta.url),'utf8'));const axe=await page.evaluate(()=>window.axe.run(document,{runOnly:{type:'tag',values:['wcag2a','wcag2aa','wcag21aa']}}));assert.deepEqual(axe.violations.map(v=>({id:v.id,targets:v.nodes.map(n=>n.target)})),[]);assert.deepEqual(errors,[]);
+});
+test('touch pinch zoom and drag pan work without operating a node', {timeout:30000},async t=>{
+ const cwd=await mkdtemp(path.join(os.tmpdir(),'touch-canvas-'));t.after(()=>rm(cwd,{recursive:true,force:true}));const board=await startBoard({cwd});t.after(()=>board.close());await board.store.save(plan);
+ const browser=await chromium.launch({channel:process.env.PLANBOARD_BROWSER_CHANNEL,headless:true});t.after(()=>browser.close());const context=await browser.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true});const page=await context.newPage();await page.goto(board.url);await openReviewDetails(page);const map=page.locator('.system-scroll').first();await map.scrollIntoViewIfNeeded();const client=await context.newCDPSession(page),r=await map.boundingBox();
+ const state=()=>map.locator('.system-canvas').evaluate(n=>({scale:+n.dataset.scale,x:+n.dataset.panX}));const before=await state(),y=Math.min(r.y+200,600),x=r.x+r.width/2;
+ const send=(type,pts)=>client.send('Input.dispatchTouchEvent',{type,touchPoints:pts.map(([id,x,y])=>({id,x,y}))});
+ await send('touchStart',[[0,x-40,y],[1,x+40,y]]);await send('touchMove',[[0,x-75,y],[1,x+75,y]]);await send('touchEnd',[]);assert.ok((await state()).scale>before.scale*1.5);
+ const zoomed=await state();await send('touchStart',[[0,x,y]]);await send('touchMove',[[0,x+40,y+10]]);await send('touchEnd',[]);assert.ok((await state()).x>zoomed.x+30);assert.equal(await map.locator('[aria-pressed=true]').count(),0);
+});

@@ -1,0 +1,9 @@
+{
+  "schemaVersion":2,"title":"Collect an online order at the dog shop","kind":"webapp","brief":"Review the customer behavior before choosing how to implement it.",
+  "workflow":{"name":"BDD","source":"Illustrative behavior-driven plan","constraints":["Agree on observable customer behavior before implementation.","These scenarios are planned examples, not executed test results."]},
+  "sections":[
+    {"id":"promise","title":"The promise to customers","blocks":[{"id":"outcome","type":"text","text":"Customers can buy online and collect their order when the shop confirms it is ready. The confirmation must make the next action clear."}]},
+    {"id":"ready","title":"The order is ready","blocks":[{"id":"scenario","type":"sequence","items":[{"id":"given","label":"Given","detail":"An order is paid and the shop has packed it."},{"id":"when","label":"When","detail":"A staff member marks the order ready for pickup."},{"id":"then","label":"Then","detail":"The customer receives the collection address, opening hours and order reference."}]}]},
+    {"id":"early","title":"The customer arrives early","blocks":[{"id":"scenario","type":"sequence","items":[{"id":"given","label":"Given","detail":"The order has not been marked ready."},{"id":"when","label":"When","detail":"The customer opens the collection instructions."},{"id":"then","label":"Then","detail":"Show that preparation is still in progress; do not claim the order is ready."}]},{"id":"decision","type":"text","text":"We still need to agree how the shop handles collection outside its published opening hours."}]}
+  ]
+}

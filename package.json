@@ -1,0 +1,91 @@
+{
+  "name": "planboard",
+  "version": "0.7.0",
+  "private": true,
+  "type": "module",
+  "description": "Human review of AI-generated plans: Markdown, interactive diagrams, annotations and connections to coding agents",
+  "pi": {
+    "extensions": [
+      "./src/extension.ts"
+    ],
+    "skills": [
+      "./skills/planboard"
+    ]
+  },
+  "scripts": {
+    "test": "node scripts/test.mjs all",
+    "start": "node src/cli.mjs",
+    "test:unit": "node scripts/test.mjs unit",
+    "test:browser": "node scripts/test.mjs browser",
+    "mcp": "node src/mcp.mjs",
+    "demo": "node scripts/demo.mjs",
+    "check:release": "node scripts/check-release.mjs"
+  },
+  "peerDependencies": {
+    "@earendil-works/pi-coding-agent": "*",
+    "@earendil-works/pi-ai": "*"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "1.32.2"
+  },
+  "peerDependenciesMeta": {
+    "@earendil-works/pi-coding-agent": {
+      "optional": true
+    },
+    "@earendil-works/pi-ai": {
+      "optional": true
+    }
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/lucapohl-angel/planboard.git"
+  },
+  "homepage": "https://github.com/lucapohl-angel/planboard#readme",
+  "bugs": {
+    "url": "https://github.com/lucapohl-angel/planboard/issues"
+  },
+  "engines": {
+    "node": ">=24"
+  },
+  "keywords": [
+    "agent-skills",
+    "mcp",
+    "claude-code",
+    "codex",
+    "pi",
+    "planboard"
+  ],
+  "bin": {
+    "planboard": "./bin/planboard.mjs"
+  },
+  "files": [
+    "bin/",
+    "src/",
+    "web/",
+    "skills/",
+    "scripts/install-skill.mjs",
+    "examples/demo.md",
+    "examples/review-demo/",
+    "examples/products/",
+    "README.md",
+    "LICENSE",
+    "docs/installation.md",
+    "docs/usage.md",
+    "docs/architecture.md",
+    "docs/media/",
+    "CONTRIBUTING.md",
+    "SECURITY.md",
+    "CHANGELOG.md",
+    "prompts/",
+    "examples/login-flow.json",
+    "examples/studio-website.json",
+    "examples/workflows/",
+    "examples/review-suite/plan-1.json",
+    "examples/review-suite/plan-2.json"
+  ],
+  "devDependencies": {
+    "playwright": "1.56.1",
+    "axe-core": "4.10.3"
+  }
+}

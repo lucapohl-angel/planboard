@@ -1,0 +1,336 @@
+{
+  "title": "Understand a login flow — example plan",
+  "kind": "webapp",
+  "brief": "An illustrative explanation of signing in to a private web app. This is a map to discuss, not an implemented or security-reviewed authentication design.",
+  "objective": "Understand where sign-in happens, which parts keep track of the session, and how failure is explained.",
+  "success": [
+    "You can trace a sign-in from the form to a private page.",
+    "You can explain what each part does without having to know the chosen framework."
+  ],
+  "scope": {
+    "now": [
+      "Map the main sign-in path and session check",
+      "Explain the proposed technology roles and recovery behavior"
+    ],
+    "later": [
+      "Choose an established authentication integration after inspecting the project",
+      "Plan account creation, account recovery and any additional sign-in factors"
+    ],
+    "out": [
+      "A complete production security design",
+      "Implementing a new password or token system from scratch"
+    ]
+  },
+  "context": [
+    {
+      "id": "illustrative",
+      "kind": "assumption",
+      "detail": "This example assumes an app with an established sign-in service and a server-managed browser session.",
+      "source": "Illustrative scenario; replace with the actual project architecture."
+    }
+  ],
+  "steps": [
+    {
+      "id": "inspect",
+      "title": "Understand the existing sign-in setup",
+      "summary": "Read the app’s current authentication integration and constraints.",
+      "why": "An existing integration should guide the plan before adding another system.",
+      "deliverable": "A short map of the current components, ownership and unresolved choices.",
+      "acceptance": [
+        "The map distinguishes observed behavior from assumptions."
+      ],
+      "dependsOn": []
+    },
+    {
+      "id": "trace",
+      "title": "Trace the normal and failed journeys",
+      "summary": "Explain how the visitor moves from the form to a private page.",
+      "why": "The diagram makes hidden handoffs and recovery choices visible.",
+      "deliverable": "A layered sign-in diagram with readable explanations.",
+      "acceptance": [
+        "Every connection has a plain-language explanation.",
+        "Failure and session-expiry behavior are shown."
+      ],
+      "dependsOn": [
+        "inspect"
+      ]
+    },
+    {
+      "id": "confirm",
+      "title": "Review choices before implementation",
+      "summary": "Resolve the important assumptions with the project owner.",
+      "why": "A useful explanation is not proof that a design is ready for production.",
+      "deliverable": "A revised plan with project-specific verification requirements.",
+      "acceptance": [
+        "The owner understands the chosen integration and its limitations."
+      ],
+      "dependsOn": [
+        "trace"
+      ]
+    }
+  ],
+  "questions": [],
+  "diagrams": [
+    {
+      "id": "login",
+      "title": "What happens when you sign in?",
+      "description": "One system, several connected groups. Visitor-facing screens, authentication services and recovery steps have their own nodes. Focus a layer to light up the relevant parts; the surrounding system stays visible in grey.",
+      "nodes": [
+        {
+          "id": "form",
+          "label": "Sign-in form",
+          "column": 0,
+          "row": 0,
+          "type": "page"
+        },
+        {
+          "id": "server",
+          "label": "App server",
+          "column": 1,
+          "row": 0,
+          "type": "service"
+        },
+        {
+          "id": "identity",
+          "label": "Identity service",
+          "column": 2,
+          "row": 0,
+          "type": "auth"
+        },
+        {
+          "id": "session",
+          "label": "Browser session",
+          "column": 1,
+          "row": 1,
+          "type": "auth"
+        },
+        {
+          "id": "private",
+          "label": "Private page",
+          "column": 2,
+          "row": 1,
+          "type": "page"
+        },
+        {
+          "id": "accounts",
+          "label": "Account records",
+          "column": 2,
+          "row": 2,
+          "type": "database"
+        },
+        {
+          "id": "retry",
+          "label": "Retry sign-in",
+          "column": 0,
+          "row": 1,
+          "type": "task"
+        },
+        {
+          "id": "expired",
+          "label": "Session expired",
+          "column": 0,
+          "row": 2,
+          "type": "decision"
+        }
+      ],
+      "layers": [
+        {
+          "id": "journey",
+          "title": "Visitor journey",
+          "color": "green",
+          "description": "Start with the visible action, then follow the handoffs until the app can show a private page.",
+          "nodes": [
+            {
+              "nodeId": "form",
+              "summary": "You ask to sign in.",
+              "detail": "The form collects the required sign-in information and shows progress while the request is processed."
+            },
+            {
+              "nodeId": "server",
+              "summary": "The app handles the request.",
+              "detail": "The server coordinates the sign-in flow using the established authentication integration."
+            },
+            {
+              "nodeId": "session",
+              "summary": "The browser gets a session.",
+              "detail": "After a successful sign-in, the app establishes a session so the visitor does not have to sign in on every page."
+            },
+            {
+              "nodeId": "private",
+              "summary": "The app checks access before showing data.",
+              "detail": "Opening a private page still requires a server-side session and permission check. A hidden link alone does not protect the underlying data."
+            }
+          ],
+          "edges": [
+            {
+              "from": "form",
+              "to": "server",
+              "label": "Submit sign-in",
+              "detail": "The browser sends the sign-in request using the established integration.",
+              "style": "solid"
+            },
+            {
+              "from": "server",
+              "to": "session",
+              "label": "Establish a session",
+              "detail": "After successful identity verification, the app establishes the session.",
+              "style": "solid"
+            },
+            {
+              "from": "session",
+              "to": "private",
+              "label": "Open the private page",
+              "detail": "The app validates the session and access permissions before showing private information.",
+              "style": "solid"
+            }
+          ]
+        },
+        {
+          "id": "technology",
+          "title": "Auth & data",
+          "color": "blue",
+          "description": "Names such as server, identity provider and session describe responsibilities. The actual products should come from the project, not from a default stack.",
+          "nodes": [
+            {
+              "nodeId": "server",
+              "summary": "Backend: trusted app behavior.",
+              "detail": "Server-side code checks requests and permissions. Sensitive configuration belongs here rather than in code downloaded by every visitor."
+            },
+            {
+              "nodeId": "identity",
+              "summary": "An established auth library or service.",
+              "detail": "Prefer the app’s existing supported integration. Introducing a new provider affects migration, account ownership, cost and maintenance."
+            },
+            {
+              "nodeId": "session",
+              "summary": "Session mechanism: remember a signed-in visitor.",
+              "detail": "In this illustrative server-session design, a browser cookie carries the session identifier. Cookie settings, expiry and request protection must follow the selected integration’s guidance."
+            },
+            {
+              "nodeId": "accounts",
+              "summary": "The identity system owns the account records.",
+              "detail": "The selected authentication integration decides how account records are stored and looked up. The browser must not directly query credential storage. This node describes a responsibility, not a chosen database product."
+            }
+          ],
+          "edges": [
+            {
+              "from": "server",
+              "to": "identity",
+              "label": "Use the auth integration",
+              "detail": "The app delegates identity verification to the supported integration.",
+              "style": "solid"
+            },
+            {
+              "from": "identity",
+              "to": "accounts",
+              "label": "Look up the account",
+              "detail": "The identity system accesses its account records through its supported storage mechanism.",
+              "style": "solid"
+            },
+            {
+              "from": "server",
+              "to": "session",
+              "label": "Create and validate the session",
+              "detail": "The server uses the existing session mechanism to recognize the signed-in visitor.",
+              "style": "solid"
+            }
+          ]
+        },
+        {
+          "id": "failure",
+          "title": "Failure & recovery",
+          "color": "red",
+          "description": "Inspect the parts involved when sign-in fails or a session ends, while keeping the same map.",
+          "nodes": [
+            {
+              "nodeId": "form",
+              "summary": "Explain the failure and allow retry.",
+              "detail": "Show a useful sign-in error without claiming success. Preserve appropriate non-sensitive input, and do not copy passwords into notes, logs or persistent drafts."
+            },
+            {
+              "nodeId": "server",
+              "summary": "Handle rejected or interrupted requests.",
+              "detail": "The server needs clear failure results, abuse controls and logging that avoids credentials. Details must be verified against the chosen integration."
+            },
+            {
+              "nodeId": "private",
+              "summary": "Explain why access stopped.",
+              "detail": "When appropriate, guide the visitor back to sign-in and restore the intended destination afterward. Returning to a private URL must still enforce permissions."
+            },
+            {
+              "nodeId": "retry",
+              "summary": "Keep the form recoverable.",
+              "detail": "Show a clear failure and a way to retry. Preserve appropriate non-sensitive inputs; do not copy passwords into persistent drafts or logs."
+            },
+            {
+              "nodeId": "expired",
+              "summary": "Explain that sign-in is needed again.",
+              "detail": "When the server rejects an expired session, protect the private content and guide the visitor back to sign-in. Re-check permissions when returning."
+            }
+          ],
+          "edges": [
+            {
+              "from": "server",
+              "to": "retry",
+              "label": "Sign-in rejected or interrupted",
+              "detail": "Return a clear result without exposing credentials or claiming success.",
+              "style": "dashed"
+            },
+            {
+              "from": "retry",
+              "to": "form",
+              "label": "Try again",
+              "detail": "Return to the recoverable form with an explanation.",
+              "style": "dashed"
+            },
+            {
+              "from": "private",
+              "to": "expired",
+              "label": "Session is no longer valid",
+              "detail": "The server prevents access when the session has expired.",
+              "style": "dashed"
+            },
+            {
+              "from": "expired",
+              "to": "form",
+              "label": "Sign in again",
+              "detail": "Return to sign-in and preserve a safe intended destination when supported.",
+              "style": "dashed"
+            }
+          ]
+        }
+      ],
+      "groups": [
+        {
+          "id": "client",
+          "title": "Customer interface",
+          "color": "blue",
+          "nodeIds": [
+            "form",
+            "retry",
+            "expired"
+          ]
+        },
+        {
+          "id": "server-zone",
+          "title": "Application",
+          "color": "green",
+          "nodeIds": [
+            "server",
+            "session"
+          ]
+        },
+        {
+          "id": "identity-zone",
+          "title": "Identity & protected data",
+          "color": "purple",
+          "nodeIds": [
+            "identity",
+            "private",
+            "accounts"
+          ]
+        }
+      ]
+    }
+  ]
+}

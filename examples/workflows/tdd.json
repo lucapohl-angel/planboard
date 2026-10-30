@@ -1,0 +1,9 @@
+{
+  "schemaVersion":2,"title":"Limit repeated password-reset requests","kind":"software","brief":"Add one testable behavior to the existing API without changing its public response format.",
+  "workflow":{"name":"TDD","source":"Illustrative test-first plan","constraints":["Write and observe the failing test before adding production behavior.","Refactor only while the relevant tests remain green."]},
+  "sections":[
+    {"id":"contract","title":"Agree the behavior","blocks":[{"id":"scope","type":"text","text":"Limit repeated reset requests per account. Reuse the existing API and test runner. The exact allowance and time window must be agreed before implementation."}]},
+    {"id":"cycle","title":"Implement one behavior at a time","blocks":[{"id":"loop","type":"sequence","items":[{"id":"red","label":"Failing test","detail":"Write a test that exceeds the agreed allowance and confirm it fails for the missing behavior."},{"id":"green","label":"Minimum implementation","detail":"Add the smallest change that rejects requests over the allowance."},{"id":"verify","label":"Verify","detail":"Run the focused tests and the related reset-flow checks."},{"id":"refactor","label":"Refactor","detail":"Remove duplication while keeping the tests passing."}]},{"id":"cases","type":"list","title":"Planned checks","items":[{"id":"limit","label":"Requests at the limit remain allowed."},{"id":"exceeded","label":"Requests above the limit are rejected."},{"id":"expiry","label":"A new time window restores the allowance."},{"id":"isolation","label":"One account does not consume another account’s allowance."}]}]},
+    {"id":"handoff","title":"Before implementation","collapsed":true,"blocks":[{"id":"commands","type":"text","text":"Inspect the project scripts to record the exact test command and affected files. Do not assume a framework or invent a passing result."}]}
+  ]
+}
