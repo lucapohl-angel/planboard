@@ -1,6 +1,6 @@
 {
   "name": "planboard",
-  "version": "0.7.0",
+  "version": "0.7.1",
   "private": true,
   "type": "module",
   "description": "Human review of AI-generated plans: Markdown, interactive diagrams, annotations and connections to coding agents",
@@ -10,7 +10,8 @@
     ],
     "skills": [
       "./skills/planboard"
-    ]
+    ],
+    "image": "https://raw.githubusercontent.com/lucapohl-angel/planboard/main/docs/media/planboard.png"
   },
   "scripts": {
     "test": "node scripts/test.mjs all",
@@ -39,7 +40,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/lucapohl-angel/planboard.git"
+    "url": "git+https://github.com/lucapohl-angel/planboard.git"
   },
   "homepage": "https://github.com/lucapohl-angel/planboard#readme",
   "bugs": {
@@ -54,10 +55,11 @@
     "claude-code",
     "codex",
     "pi",
-    "planboard"
+    "planboard",
+    "pi-package"
   ],
   "bin": {
-    "planboard": "./bin/planboard.mjs"
+    "planboard": "bin/planboard.mjs"
   },
   "files": [
     "bin/",
@@ -82,7 +84,8 @@
     "examples/studio-website.json",
     "examples/workflows/",
     "examples/review-suite/plan-1.json",
-    "examples/review-suite/plan-2.json"
+    "examples/review-suite/plan-2.json",
+    "docs/publishing.md"
   ],
   "devDependencies": {
     "playwright": "1.56.1",

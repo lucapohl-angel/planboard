@@ -68,6 +68,20 @@ Cloning is recommended for contributors. A [GitHub release](https://github.com/l
 
 The package directory is `/absolute/install-dir/node_modules/planboard`. Run its skill installer and register its MCP entry file using that absolute directory, following the same agent setup above. For Pi, install that directory with `pi install`. Keep the directory in place. The packages are distributed through GitHub, not the npm registry; do not assume `npm install planboard` refers to this project.
 
+## Upcoming npm convenience commands
+
+The npm release is pending publisher login and a final package scope. These commands are prepared for 0.7.1; they are not included in the first GitHub release archive. After that release is installed globally, the command will be available on PATH:
+
+```bash
+planboard install-skill --agent codex
+codex mcp add planboard -- planboard mcp
+# Or Claude Code:
+planboard install-skill --agent claude
+claude mcp add --scope user --transport stdio planboard -- planboard mcp
+```
+
+These convenience subcommands are available from 0.7.1. A persistent global install is recommended for skill links; linking a skill into an ephemeral `npx` cache would leave it dependent on that cache. The original absolute-path setup remains supported.
+
 ## Updates and removal
 
 Update the checkout with `git pull --ff-only`, then run `npm ci`. Restart the agent/MCP server; Pi users can run `/reload`. Restart active previews after an update.

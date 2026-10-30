@@ -1,0 +1,33 @@
+name: Publish to npm
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          registry-url: https://registry.npmjs.org
+      - name: Require an explicitly prepared release tag
+        run: |
+          node --input-type=module <<'JS'
+          import fs from 'node:fs';
+          const p=JSON.parse(fs.readFileSync('package.json','utf8'));
+          if(p.private===true||p.publishConfig?.access!=='public')throw new Error('Prepare the package name and public publishConfig before publishing.');
+          if(process.env.GITHUB_REF!==`refs/tags/v${p.version}`)throw new Error('Dispatch this workflow on the matching version tag.');
+          JS
+      - run: npm install --global npm@12.2.1
+      - run: npm ci --omit=peer
+      - run: npm run check:release
+      - run: npx playwright install --with-deps chromium
+      - run: npm test
+      - run: npm publish --access public

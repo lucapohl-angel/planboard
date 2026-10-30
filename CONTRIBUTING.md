@@ -9,3 +9,5 @@ Run `npm run test:unit`. For browser coverage, run `npx playwright install chrom
 Before a release, run `npm run check:release` and inspect `npm pack --dry-run`. Test a fresh checkout, the documented install commands, and the appropriate MCP lifecycle. Explain what was actually tested; protocol tests do not establish live-model quality. Keep screenshot assets under `docs/media/` and use synthetic data only.
 
 Changes should include focused behavior checks when they affect persistence, permissions, lifecycle, or feedback. Preserve original Markdown and user edits. Approval of a reviewed plan never authorizes implementing it.
+
+See [publishing](docs/publishing.md) for the first npm release and the manual trusted-publisher workflow.

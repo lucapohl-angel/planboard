@@ -20,6 +20,6 @@ for(const file of files){
 }
 for(const file of ['README.md','LICENSE','CONTRIBUTING.md','SECURITY.md','CHANGELOG.md','docs/installation.md','docs/usage.md','docs/architecture.md'])if(!files.includes(file))errors.push(`Missing release document: ${file}`);
 const pkg=JSON.parse(await readFile('package.json','utf8'));
-if(pkg.private!==true)errors.push('GitHub-only publication must retain private:true until npm publication is intentional.');
+if(pkg.private!==true&&(pkg.publishConfig?.access!=='public'||pkg.publishConfig?.registry!=='https://registry.npmjs.org/'))errors.push('Registry releases must explicitly select public access and the npm registry.');
 if(!pkg.repository?.url||!pkg.engines?.node||!pkg.license)errors.push('Package metadata is incomplete.');
 if(errors.length){console.error(errors.join('\n'));process.exitCode=1;}else console.log(`Release checks passed for ${files.length} public files. This focused scan does not replace review of the staged diff.`);
