@@ -1,10 +1,10 @@
 # Changelog
 
-## 0.7.1 — npm publication preparation (unreleased)
+## 0.7.1 — first npm release
 
 - Add `planboard install-skill --agent codex|claude` and a portable `planboard mcp` entry point.
-- Prepare public registry packaging, npm-compatible README links, and Pi package-gallery metadata.
-- Add a manually dispatched trusted-publishing workflow; final package scope and npm authentication are still required before registry publication.
+- Publish `@koboimomo/planboard` with npm-compatible README links and Pi package-gallery metadata.
+- Add a manually dispatched trusted-publishing workflow for maintainers to configure.
 
 ## 0.7.0 — first public release
 

@@ -1,7 +1,6 @@
 {
-  "name": "planboard",
+  "name": "@koboimomo/planboard",
   "version": "0.7.1",
-  "private": true,
   "type": "module",
   "description": "Human review of AI-generated plans: Markdown, interactive diagrams, annotations and connections to coding agents",
   "pi": {
@@ -90,5 +89,9 @@
   "devDependencies": {
     "playwright": "1.56.1",
     "axe-core": "4.10.3"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
   }
 }

@@ -1,8 +1,40 @@
 # Install Planboard
 
-Use Node.js **24 or newer**, npm, and a local browser. The tools run on your computer. An agent account is needed for agent work; no additional provider key is required by Planboard itself. Claude Code and Codex use their own configured agent through MCP. Pi uses its native extension.
+Use **Node.js 24+**, npm, and a local browser. Each project works independently. Claude Code and Codex use their own configured agent through MCP; Pi uses the native extension. No additional provider key is required by Planboard.
 
-## Get the runtime
+## Pi
+
+```bash
+pi install npm:@koboimomo/planboard
+```
+
+Run `/reload` or start a new Pi session, then invoke `/planboard` in your project. The package declares its native extension and skill; a second MCP connection is unnecessary. Pi installs the runtime dependencies. No build step is required.
+
+## Claude Code
+
+```bash
+npm install -g @koboimomo/planboard
+planboard install-skill --agent claude
+claude mcp add --scope user --transport stdio planboard -- planboard mcp
+```
+
+Start a new Claude Code session in your project and invoke `/planboard`. The skill is linked under `~/.claude/skills/planboard`. Verify MCP with `claude mcp list` or `/mcp`. Existing unrelated skills are never overwritten.
+
+## Codex
+
+```bash
+npm install -g @koboimomo/planboard
+planboard install-skill --agent codex
+codex mcp add planboard -- planboard mcp
+```
+
+Start a new Codex session in your project and invoke `$planboard`. The installer links the skill under `~/.agents/skills/planboard`. Check `codex mcp list` and the session's tool list. The skill and MCP connection are both needed for the integrated workflow.
+
+Use a persistent installation for skill links. An ephemeral `npx` cache is not a suitable permanent skill location. If you already configured this tool under another server name, reuse or remove that registration instead of connecting twice.
+
+## Install from source
+
+For development or a checkout you want to keep in place:
 
 ```bash
 git clone https://github.com/lucapohl-angel/planboard.git
@@ -10,90 +42,62 @@ cd planboard
 npm ci
 ```
 
-Keep the checkout in place after installation: skill links and MCP commands point to it. Commands below run from this directory. You do not need to install the other project.
-
-## Claude Code
+From that checkout, choose one integration:
 
 ```bash
-node scripts/install-skill.mjs --agent claude
-claude mcp add --scope user --transport stdio planboard -- node "$PWD/src/mcp.mjs"
-```
-
-Start a new Claude Code session in the project you want to work on. Invoke `/planboard` to review an existing Markdown plan. The skill is linked under `~/.claude/skills/planboard`. Existing unrelated skills are never overwritten by the installer.
-
-Verify the connection with `claude mcp list` or `/mcp` in the session. If you already configured a server pointing to this checkout under another name, reuse it or remove the old registration instead of connecting twice.
-
-## Codex
-
-```bash
-node scripts/install-skill.mjs --agent codex
-codex mcp add planboard -- node "$PWD/src/mcp.mjs"
-```
-
-Start a new Codex session in your project and invoke `$planboard`. The installer uses the documented user skill directory, `~/.agents/skills/planboard`. Check the server with `codex mcp list` and the session's MCP tool list. The skill and MCP server are both needed for the integrated workflow.
-
-## Pi
-
-After the runtime setup above:
-
-```bash
+# Pi
 pi install "$PWD"
+
+# Claude Code
+node scripts/install-skill.mjs --agent claude
+claude mcp add --scope user --transport stdio planboard -- node "$PWD/bin/planboard.mjs" mcp
+
+# Codex
+node scripts/install-skill.mjs --agent codex
+codex mcp add planboard -- node "$PWD/bin/planboard.mjs" mcp
 ```
 
-Run `/reload` in an existing Pi session or start a new one. Invoke `/planboard` in the project you want to work on. The package declares its extension and skill; a second MCP connection is unnecessary. Pi remains optional for Claude Code and Codex installations.
+Keep the checkout in place: skill links and MCP commands point to it. If switching from an existing source installation to npm, remove only the old skill symlink and MCP registration before installing the replacement. The installer intentionally refuses to replace a different skill directory. Project plans and feedback remain untouched.
 
-## Windows PowerShell
+## Windows and macOS
 
-Use the same clone, npm, and skill-installer commands. For MCP registration, replace the shell-specific `$PWD` command above with:
+The global npm commands work without shell-specific path syntax. Ensure the agent can find the installed command on PATH. For source setup in PowerShell, replace `$PWD` with `(Get-Location).Path` and use an absolute entry-file path:
 
 ```powershell
 $Repo = (Get-Location).Path
-claude mcp add --scope user --transport stdio planboard -- node "$Repo\src\mcp.mjs"
-codex mcp add planboard -- node "$Repo\src\mcp.mjs"
-# Pi instead:
-pi install $Repo
+claude mcp add --scope user --transport stdio planboard -- node "$Repo\bin\planboard.mjs" mcp
+codex mcp add planboard -- node "$Repo\bin\planboard.mjs" mcp
 ```
 
-The installer creates a directory junction on Windows and a directory symlink elsewhere. CI is configured for Linux; the commands are written portably, but Windows and macOS are not yet end-to-end tested.
+The installer creates a directory junction on Windows and a directory symlink elsewhere. Local checks cover Linux. CI is configured for Linux; Windows and macOS have not yet been tested end to end.
 
-## Other agents and plain CLI
+## Other agents and feedback delivery
 
-Any local agent that can read skill files and use a stdio MCP server can follow the same workflow. Configure the server command `node src/mcp.mjs` using an absolute path to its entry file, then supply `skills/planboard/SKILL.md` as instructions. Project operations require an explicit absolute `cwd`; the MCP installation directory is not your working project.
+Configure the stdio MCP command `planboard mcp`, or run the entry file with Node using its absolute path. Supply `skills/planboard/SKILL.md` as workflow instructions. Project operations require an explicit absolute `cwd`; the installation directory is not the working project.
 
-MCP feedback requires an active `wait` loop. A host that supports background agents can delegate that loop to a dedicated worker. An idle or disconnected host does not automatically receive new prompts. See [usage and feedback](usage.md) for recovery and the CLI fallback.
+MCP feedback requires an active `wait` loop. A background worker must actually have access to the MCP tools. An idle or disconnected host cannot be assumed to wake automatically. See [usage](usage.md) for feedback, recovery, and CLI behavior.
 
-## Release archive
+## Release archives
 
-Cloning is recommended for contributors. A [GitHub release](https://github.com/lucapohl-angel/planboard/releases/latest) also includes a packaged `.tgz` runtime. Install the downloaded archive into a dedicated directory with `npm install --prefix /absolute/install-dir /path/to/planboard-VERSION.tgz`. This downloads its runtime dependencies; it is not a self-contained executable. Planboard needs no browser build step.
-
-The package directory is `/absolute/install-dir/node_modules/planboard`. Run its skill installer and register its MCP entry file using that absolute directory, following the same agent setup above. For Pi, install that directory with `pi install`. Keep the directory in place. The packages are distributed through GitHub, not the npm registry; do not assume `npm install planboard` refers to this project.
-
-## Upcoming npm convenience commands
-
-The npm release is pending publisher login and a final package scope. These commands are prepared for 0.7.1; they are not included in the first GitHub release archive. After that release is installed globally, the command will be available on PATH:
-
-```bash
-planboard install-skill --agent codex
-codex mcp add planboard -- planboard mcp
-# Or Claude Code:
-planboard install-skill --agent claude
-claude mcp add --scope user --transport stdio planboard -- planboard mcp
-```
-
-These convenience subcommands are available from 0.7.1. A persistent global install is recommended for skill links; linking a skill into an ephemeral `npx` cache would leave it dependent on that cache. The original absolute-path setup remains supported.
+[GitHub releases](https://github.com/lucapohl-angel/planboard/releases/latest) include a `.tgz` runtime as an alternative to the registry. Install a downloaded scoped archive with `npm install -g /path/to/koboimomo-planboard-VERSION.tgz`, then use the same agent commands above. Runtime dependencies still download during installation. The original unscoped GitHub release is historical; use the current scoped package.
 
 ## Updates and removal
 
-Update the checkout with `git pull --ff-only`, then run `npm ci`. Restart the agent/MCP server; Pi users can run `/reload`. Restart active previews after an update.
+- npm: `npm install -g @koboimomo/planboard@latest`.
+- Pi: `pi update npm:@koboimomo/planboard`; use `pi remove npm:@koboimomo/planboard` to uninstall.
+- Source: `git pull --ff-only`, then `npm ci`.
 
-To remove the MCP registration, use `codex mcp remove planboard` or `claude mcp remove --scope user planboard`. For Pi, use `pi remove /absolute/path/to/planboard`. Remove only the corresponding skill symlink/junction if desired. Project plans and feedback remain in their project directories.
+Restart the agent/MCP server and active previews after updating; Pi users can run `/reload`. Skill links follow the persistent installation directory.
+
+Remove MCP with `codex mcp remove planboard` or `claude mcp remove --scope user planboard`. Remove only this tool's skill symlink/junction, then use `npm uninstall -g @koboimomo/planboard` if no longer needed. Uninstalling the runtime does not remove project data.
 
 ## Troubleshooting
 
-- **Skill not found:** check the installer output, the linked checkout, and the agent's skill list; restart the session.
-- **Tool not found:** check MCP registration and stderr. Use an absolute entry-file path and Node 24+.
-- **Preview missing:** keep the runtime process alive and open its printed loopback URL.
-- **Feedback waits indefinitely:** make sure the owning agent or its background worker is actively calling `wait`; a saved note is not proof an agent is processing it.
-- **Remote/SSH agent:** the browser must reach the machine running the server. Use a trusted SSH tunnel; these are local tools, not public hosted services.
+- **Command not found:** check Node 24+, the npm global bin directory, and the agent's PATH. An absolute Node entry-file command is a supported fallback.
+- **Skill not found:** check the installer output and linked directory; restart the agent session.
+- **Tool missing:** check MCP registration and stderr; avoid duplicate connections.
+- **Preview missing:** keep the runtime alive and open its printed loopback URL. Source Formative installations need `npm run build`; npm includes the built assets.
+- **Feedback waits:** confirm the owning agent or worker is actively calling `wait`; saving a note does not mean a model processed it.
+- **Remote/SSH agent:** use a trusted SSH tunnel to reach the machine running the server. These are local tools, not public hosted services.
 
-Setup references: [Codex skills](https://learn.chatgpt.com/docs/build-skills), [Codex MCP](https://learn.chatgpt.com/docs/extend/mcp?surface=cli), [Claude Code skills](https://code.claude.com/docs/en/skills), [Claude Code MCP](https://code.claude.com/docs/en/mcp), [Pi](https://pi.dev/).
+Setup references: [Codex skills](https://learn.chatgpt.com/docs/build-skills), [Codex MCP](https://learn.chatgpt.com/docs/extend/mcp?surface=cli), [Claude Code skills](https://code.claude.com/docs/en/skills), [Claude Code MCP](https://code.claude.com/docs/en/mcp), [Pi packages](https://pi.dev/docs/latest/packages).

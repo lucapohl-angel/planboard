@@ -1,14 +1,14 @@
 # Publishing Planboard
 
-GitHub releases and npm registry publication are separate. The first GitHub release includes a tested runtime archive. Registry publication is being prepared; do not advertise a registry install command until that exact package/version exists.
+The registry package is `@koboimomo/planboard`. GitHub releases and npm publication are separate steps; verify both before announcing a release.
 
-## First npm publication
+## Prepare and publish
 
-1. Sign in locally with `npm login` and verify the intended account using `npm whoami`. Complete npm's browser or two-factor prompts yourself; never put credentials into a repository or chat.
-2. Choose a package name the account owns. `formative` is an unrelated existing package, so prefer a consistent user/organization scope for both tools. The CLI names and skill names remain `planboard` and `formative` regardless of the npm scope.
-3. Set the final `package.json` name, remove `private: true`, and set `publishConfig` to `{"access":"public","registry":"https://registry.npmjs.org/"}`. Update the lockfile, installation guides, and version. Keep the explicit `files` allowlist and Pi manifest.
-4. Run the documented checks, `npm publish --dry-run`, and a fresh archive install. Verify the executable, skill installer, MCP lifecycle, and browser assets. Formative must be built before packing; its `prepack` script does this.
-5. Commit and tag the tested release. Run `npm publish --access public` from the checkout, completing npm authentication if requested. Confirm the exact registry version and install it into a temporary prefix before announcing availability. A successful pack/dry run is not a published package.
+1. Use `npm whoami` to verify publisher access. Complete npm's browser or two-factor prompts yourself; never commit credentials.
+2. Update the version, changelog, lockfile, and any affected guides. Keep the explicit `files` allowlist, public `publishConfig`, executable name, and Pi manifest.
+3. Run the documented checks and `npm publish --dry-run`. Install the packed archive into a fresh prefix and verify the CLI, skill installer, MCP lifecycle, and browser assets. Formative's `prepack` builds its browser assets.
+4. Commit the tested release, then run `npm publish --access public`. Confirm the exact registry version and install it into a fresh prefix. A successful pack/dry run is not publication.
+5. Tag the release and publish GitHub notes and the matching archive. Keep the previous tags immutable.
 
 ## Later releases through GitHub Actions
 

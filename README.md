@@ -25,7 +25,31 @@ Planboard opens only when explicitly requested. It does not run a planning hook 
 
 ## Quick start
 
-Install **Node.js 24+**, npm, and Git. From a terminal:
+Use **Node.js 24+**. For Pi, install the package directly:
+
+```bash
+pi install npm:@koboimomo/planboard
+```
+
+Run `/reload`, then `/planboard` in your project. The package includes the extension and skill.
+
+For Claude Code or Codex:
+
+```bash
+npm install -g @koboimomo/planboard
+
+# Claude Code
+planboard install-skill --agent claude
+claude mcp add --scope user --transport stdio planboard -- planboard mcp
+
+# Or Codex
+planboard install-skill --agent codex
+codex mcp add planboard -- planboard mcp
+```
+
+Restart the agent, then invoke `/planboard` in Claude Code or `$planboard` in Codex. Install only the integration you use. [Installation, updates, and source setup](https://github.com/lucapohl-angel/planboard/blob/main/docs/installation.md).
+
+### Try the fictional demo
 
 ```bash
 git clone https://github.com/lucapohl-angel/planboard.git
@@ -34,9 +58,7 @@ npm ci
 npm run demo
 ```
 
-Open the printed URL. The demo uses fictional data and runs without an agent. It creates a temporary project and keeps its server alive until you press Ctrl+C. Questions remain queued in an offline demo; connect an agent for answers.
-
-For your own plans, follow the [installation guide](https://github.com/lucapohl-angel/planboard/blob/main/docs/installation.md) to install the skill and connect the runtime. No additional model API key is needed by Planboard.
+Open the printed URL. The demo runs without an agent in a temporary project; Ctrl+C stops it. Feedback stays queued until an agent is attached.
 
 ## Choose your agent
 
@@ -79,6 +101,8 @@ The local server binds to loopback. Browser feedback sent to an agent follows th
 [Formative](https://github.com/lucapohl-angel/formative) helps discover what an app needs through persistent interviewing and prototype checkpoints. Planboard helps review the resulting plan. You can use either on its own or bring Formative's written plan into Planboard; neither package imports or requires the other.
 
 ## Development and limits
+
+From a source checkout:
 
 ```bash
 npm run test:unit
