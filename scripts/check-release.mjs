@@ -11,7 +11,7 @@ for(const file of files){
  if(stat.isSymbolicLink()){errors.push(`Review symlink before publication: ${file}`);continue;}
  if(!/\.(md|mjs|js|ts|tsx|json|yaml|yml|html|css|py)$/.test(file))continue;
  const source=await readFile(full,'utf8');
- if(file!=='scripts/check-release.mjs'&&/\/home\/momokoboi|pi-web-quality-kit|BEGIN (?:RSA |EC |OPENSSH )?PRIVATE KEY|gh[pousr]_[A-Za-z0-9]{30,}/.test(source))errors.push(`Local path or credential marker: ${file}`);
+ if(file!=='scripts/check-release.mjs'&&/\/(?:home|Users)\/[A-Za-z0-9._-]+\/|(?:\.\.\/){2}[^\s\x27\x22]+\/node_modules\/|BEGIN (?:RSA |EC |OPENSSH )?PRIVATE KEY|gh[pousr]_[A-Za-z0-9]{30,}/.test(source))errors.push(`Local path or credential marker: ${file}`);
  if(file.endsWith('.md'))for(const match of source.matchAll(/!?\[[^\]\n]*\]\(([^)\s]+)(?:\s+"[^"]*")?\)/g)){
   const target=match[1].split('#')[0];
   if(!target||/^(?:[a-z]+:|\/)/i.test(target)||/[<>${}]/.test(target))continue;
