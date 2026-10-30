@@ -87,7 +87,7 @@ npm run test:browser
 npm run check:release
 ```
 
-Tests cover persistence, stale revisions, source preservation, MCP feedback/reconnection, browser interaction, and accessibility checks. Optional native Pi integration tests need an installed Pi runtime. Linux is exercised in CI; macOS and Windows installation commands are provided but are not yet end-to-end tested. Protocol tests do not guarantee an agent's reasoning quality.
+Tests cover persistence, stale revisions, source preservation, MCP feedback/reconnection, browser interaction, and accessibility checks. Optional native Pi integration tests need an installed Pi runtime. CI is configured for Linux; macOS and Windows installation commands are provided but are not yet end-to-end tested. Protocol tests do not guarantee an agent's reasoning quality.
 
 This is an early public release of a local single-user tool. Structural validation cannot prove that a plan is feasible, secure, or complete. Direct editing covers text fields, not arbitrary structural changes. Undo can be blocked by conflicting later edits. See [usage and limits](docs/usage.md).
 

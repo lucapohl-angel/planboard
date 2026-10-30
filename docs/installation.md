@@ -54,13 +54,19 @@ codex mcp add planboard -- node "$Repo\src\mcp.mjs"
 pi install $Repo
 ```
 
-The installer creates a directory junction on Windows and a directory symlink elsewhere. Linux is exercised in CI; the commands are written portably, but Windows and macOS are not yet end-to-end tested.
+The installer creates a directory junction on Windows and a directory symlink elsewhere. CI is configured for Linux; the commands are written portably, but Windows and macOS are not yet end-to-end tested.
 
 ## Other agents and plain CLI
 
 Any local agent that can read skill files and use a stdio MCP server can follow the same workflow. Configure the server command `node src/mcp.mjs` using an absolute path to its entry file, then supply `skills/planboard/SKILL.md` as instructions. Project operations require an explicit absolute `cwd`; the MCP installation directory is not your working project.
 
 MCP feedback requires an active `wait` loop. A host that supports background agents can delegate that loop to a dedicated worker. An idle or disconnected host does not automatically receive new prompts. See [usage and feedback](usage.md) for recovery and the CLI fallback.
+
+## Release archive
+
+Cloning is recommended for contributors. A [GitHub release](https://github.com/lucapohl-angel/planboard/releases/latest) also includes a packaged `.tgz` runtime. Install the downloaded archive into a dedicated directory with `npm install --prefix /absolute/install-dir /path/to/planboard-VERSION.tgz`. This downloads its runtime dependencies; it is not a self-contained executable. Planboard needs no browser build step.
+
+The package directory is `/absolute/install-dir/node_modules/planboard`. Run its skill installer and register its MCP entry file using that absolute directory, following the same agent setup above. For Pi, install that directory with `pi install`. Keep the directory in place. The packages are distributed through GitHub, not the npm registry; do not assume `npm install planboard` refers to this project.
 
 ## Updates and removal
 
